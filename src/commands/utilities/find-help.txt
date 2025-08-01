@@ -1,0 +1,37 @@
+/find Command Help
+
+Filter and find saves based on options.
+
+# **Options:**
+- **screenshot-count**: Filter saves by the number of screenshots. Accepts exact numbers or comparison expressions (e.g., `>3`, `<=5`).
+- **sub-mode**: Filter by the sub-mode (dirSortedMode) of the save. Choose from available modes.
+- **tank-class**: Search for saves where the tank's name contains the specified text.
+- **history-count**: Filter by the number of past saves. Supports comparison expressions.
+- **score**: Filter by the save's score. Supports comparison expressions.
+- **runtime-seconds**: Filter by the time spent alive (in seconds). Supports comparison expressions.
+
+# **Comparison Expressions:**
+You can use the following operators for numeric options:
+- `>` (greater than)
+- `<` (less than)
+- `=` or `==` (equal to)
+- `>=` (greater than or equal to)
+- `<=` (less than or equal to)
+
+`5`, `=5` and `==5` mean the exact same.
+
+**Range Matching 1:**
+For approximate matching, use the format `<range>value`, e.g., `<5>100` matches values between 95 and 105.
+
+**Range Matching 2:**
+For range matching, use the format `<min-max>`, e.g., `<10-20>` matches values between 10 and 20 (inclusive).
+
+You are free to use commas and periods wherever for readability.
+They won't change how the command functions.
+
+**Examples:**
+- `/find screenshot-count:>=1 score:<5.000.000`
+- `/find tank-class:sniper runtime-seconds:>3600`
+- `/find history-count:0 score:<200,000>1,000,000`
+
+Results are shown in pages, with up to 25 saves per page. Only the first 10 pages are displayed.

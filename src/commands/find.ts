@@ -1,0 +1,135 @@
+import { ActionRowBuilder, ButtonBuilder, InteractionReplyOptions, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder } from "discord.js";
+
+import { Command, DirSortedMode, Region, SaveQueryOptions } from "./utilities/types";
+import saveCollection, { arrasSaves, modes, modeToDescription, regions, SaveCollection } from './utilities/saves';
+import sliceEmbeds from "./utilities/embedpager";
+import { InteractionCompiler } from "./utilities/oper";
+
+const command: Command = {
+    payload: new SlashCommandBuilder()
+    .setName("find")
+    .setDescription("Search the saves.")
+    .addBooleanOption(o => o
+        .setName("include-ended-runs")
+        .setDescription("Whether to include delete runs in the search.")
+    )
+    .addStringOption(o => o
+        .setName("screenshot-count")
+        .setDescription("Filter saves by the number of screenshots.")
+    )
+    .addStringOption(o => o
+        .setName("sub-mode")
+        .setDescription("Filter by the sub-mode (dirSortedMode) of the save. **Editable later**")
+        .addChoices(modes.map(value => {return {name: value, value}}))
+    )
+    .addStringOption(o => o 
+        .setName("history-count")
+        .setDescription("Filter by the number of past saves. Supports comparison.")
+    )
+    .addStringOption(o => o
+        .setName("region")
+        .setDescription("The region of the server where it was saved.")
+        .addChoices(regions.map(value => {return {name: value, value}}))
+    )
+    .addStringOption(o => o
+        .setName("match-code")
+        .setDescription("Match any part of the code. do /find-help for help.")
+    )
+    ,
+    async execute(interaction) {
+        const compiler = new InteractionCompiler(interaction);
+        const options = interaction.options;
+
+        const includeEnded = options.getBoolean("include-ended-runs") || false
+        let screenshotExpr = options.getString("screenshot-count")
+        let dirSortedMode = options.getString("sub-mode") as DirSortedMode
+        let tankClassQuery = options.getString("tank-class")
+        let historyExpr = options.getString("history-count")
+        let scoreExpr = options.getString("score");
+        let runtimeExpr = options.getString("runtime-seconds");
+        let region = options.getString("region") as Region;
+
+        let codeMatcher = options.getString("match-code");
+
+        let ssFunc = compiler.compile(screenshotExpr);
+        if (ssFunc == false) return;
+
+        let historyFunc = compiler.compile(historyExpr);
+        if (historyFunc == false) return;
+
+        let scoreFunc = compiler.compile(scoreExpr);
+        if (scoreFunc == false) return;
+
+        let runtimeFunc = compiler.compile(runtimeExpr);
+        if (runtimeFunc == false) return;
+
+        let searchOptions: SaveQueryOptions = {
+            screenshots: ssFunc,
+            history: historyFunc,
+            dirSortedMode: [dirSortedMode],
+            region
+        }
+
+        let results = saveCollection.querySaves(
+            searchOptions,
+            includeEnded
+        );
+
+        const dirSortedModeSelectMenu = new StringSelectMenuBuilder()
+            .setCustomId("dir-sorted-mode-menu")
+            .setPlaceholder(dirSortedMode ? "<DirSortedMode>" : dirSortedMode)
+            .addOptions(modes.map(mode => {
+                return new StringSelectMenuOptionBuilder()
+                .setLabel(mode)
+                .setValue(mode)
+                .setDescription(modeToDescription[mode])
+            }))
+
+        const row = new ActionRowBuilder<StringSelectMenuBuilder>()
+            .addComponents(dirSortedModeSelectMenu)
+
+        const fieldSize = 25;
+
+        let embeds = sliceEmbeds(
+            Object.values(results).map(
+            save => {return {name: save.path.name, value: save.code.toString(), inline: true}}),
+            i => `A saves search done by ${interaction.user.globalName} page ${i % fieldSize}:`
+        );
+
+        const sendingOptions: InteractionReplyOptions & { withResponse: true } = {
+            withResponse: true,
+            embeds: [embeds[0]],
+            components: [row],
+        }
+               
+        let response = await interaction.reply(sendingOptions);
+
+        const collectorFilter = (i: any) => i.user.id === interaction.user.id;
+
+        try {  
+            const confirmation = await response.resource!.message!.awaitMessageComponent({ 
+                filter: collectorFilter, time: 60_000 
+            }) as StringSelectMenuInteraction;
+
+            if (confirmation.customId != "dir-sorted-mode-menu") return;
+
+            searchOptions.dirSortedMode = confirmation.values as DirSortedMode[]
+            results = saveCollection.querySaves(searchOptions, includeEnded);
+
+            embeds = sliceEmbeds(
+                results.map(
+                save => {return {name: save.path.name, value: save.code.toString(), inline: true}}),
+                i => `A saves search done by ${interaction.user.globalName} page ${i % fieldSize}:`
+            );
+
+            sendingOptions.embeds = [embeds[0]];
+            interaction.editReply(sendingOptions as any)
+
+        } catch {}
+    },
+    test() {
+        return true;
+    },
+}
+
+export default command;

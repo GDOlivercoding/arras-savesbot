@@ -1,0 +1,19 @@
+{
+  "name": "savesbot",
+  "version": "1.0.0",
+  "description": "discord.js saves bot",
+  "license": "ISC",
+  "author": "EclipSyS",
+  "type": "module",
+  "main": "index.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@types/node": "^24.0.3",
+    "arras-parser": "file:../../../../Python/projects/arras parser",
+    "discord.js": "^14.20.0",
+    "dotenv": "^16.5.0",
+    "pathobj": "file:../../filesys/path"
+  }
+}
