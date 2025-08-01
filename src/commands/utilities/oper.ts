@@ -26,10 +26,8 @@ const opToFunc: {
 } = {
     ">": (statVal, userVal) => statVal > userVal,
     "<": (statVal, userVal) => statVal < userVal,
-    "=": (statVal, userVal) => statVal == userVal,
     "<=": (statVal, userVal) => statVal <= userVal,
     ">=": (statVal, userVal) => statVal >= userVal,
-    get "=="() { return this["="] }
 }   
 
 const aroundFunc = (statVal: number, userVal: number, rangeBoundary: number) => {
@@ -40,7 +38,7 @@ const rangeFunc = (statVal: number, min: number, max: number) => {
     return statVal >= min && statVal <= max
 }
 
-const re_matchGeneric = /^(?<oper>[>|<|=]=?)\D*(?<value>\d+)$/;
+const re_matchGeneric = /^(?<oper>[><]=?)\D*(?<value>\d+)$/;
 const re_matchAround = /^<(?<range>\d+)>(?<value>\d+)$/;
 const re_matchRange = /^<(?<min>\d+)\D*-\D*(?<max>\d+)>$/
 const re_matchSingleSlot = /^\[(?<key>[a-z]+|\d+);(?<value>[\d|a-z|A-Z]+)\]$/
