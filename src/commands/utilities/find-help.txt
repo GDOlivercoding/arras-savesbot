@@ -9,34 +9,34 @@ NOTE: All code parts are matchable in the match-code options.
 - **history-count**: Filter by the number of past saves. Supports comparison expressions. type: NumberOrNumeralOperation 
 - **region**: Filter by the server region where the save was made. type: Literal string
 
-- **match-code**: Match code parts. See below for details.
+- **match-code**: Match code parts. See below for details. type: CodePartExpression
 
 # Value Types
 
-**NumberOrNumeralOperation:** (<|>|<=|>=)?<number>
-option 1: Any decimal or hexadecimal (0x*) integer
-option 2: You can use the following operators for numeric options:
-- `>` (greater than)
-- `<` (less than)
-- `>=` (greater than or equal to)
-- `<=` (less than or equal to)
-- <operator><number>
+**number**: Any decimal (123) or hexadecimal (0x*) integer
 
+**NumberOrNumeralOperation:** number, (<|>|<=|>=)number, <number>number, <number-number>
+option 1: number, this will check for strict equality.
+option 2: Prefix operator before number: >, <, >= and <= (ex.: >5, <=50).
 option 3: `<number>number`, e.g., `<5>100` matches values between 95 and 105.
 option 4: `<number-number>`, e.g., `<10-20>` matches values between 10 and 20 (inclusive).
 
 You are free to use commas and periods wherever for readability.
 They won't change how the command functions.
 
---- End
+**DateOperation:** (<|>|<=|>=)\[(\d+(y|mon|d|h|min|s) ?)+\]
+An operator followed by [] filled with numbers with a measurement suffix.
+NumberOrNumeralOperation but replace number with \[(\d+(y|mon|d|h|min|s) ?)+\]
+(ex.: >=[2024y 6mon 99h], <[2mon]>[2024y 7mon], <[2024y]-[2025y]>)
+Unspecified values default to current UTC values.
 
-**Matching Code Parts:**
+**CodePartExpression**
 All non-code parts are their own options (like region).
 Use the `match-code` option to match code parts:
 syntax: [key;value], [key;value], ...
 
 key may be a string which one of the options below contain (kills, kill(s), (po)lygon(s)), 
-or an index of the part in the code [0-14].
+or an index of the part in the code [0-13].
 
 - Example: `[score;>1,000,000]` or `[6;>1,000,000]`
 - Multiple pairs can be separated by commas: `[score;>=1,000,000],[kills;<10]`
@@ -55,8 +55,10 @@ or an index of the part in the code [0-14].
 - 9: bosses: numberOrOp, boss kills or assists
 - 10: polygons: numberOrOp, polygons destroyed
 - 11: custom: numberOrOp, special "dread" kills
-- 12: creation: date (unix timestamp or formatted date)
+- 12: creation: numberOrOp with unix timestamp (>=1754080892) or **DateOperation**
 - 13: token: unsupported
+
+---
 
 **Command Examples:**
 - `/find screenshot-count:>=1 score:<5.000.000`

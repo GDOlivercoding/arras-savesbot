@@ -1,16 +1,13 @@
 import { Path } from "pathobj/tspath";
-import { SaveCode } from "./code";
-import { CompiledFunc, DirSortedMode, Region, Save, SaveQueryOptions, SaveStructure } from "./types";
+import { Build, SaveCode } from "./code";
+import { NumOpFunc, DirSortedMode, Region, Save, SaveQueryOptions, SaveStructure, ModeToDescription, PickedCodeKeys, SaveEndedRun, AnySave } from "./types";
+import { Gamemode } from "arras-parser/types";
 
 export const arrasSaves = new Path("C:\\Users\\Uzivatel\\Desktop\\Directory\\content\\Arras.io saves")
 export const modes: DirSortedMode[] = [
     "Normal", "Growth", 
     "Arms Race", "Olddreads", "Newdreads"
 ];
-
-export type ModeToDescription = {
-    [K in typeof modes[number]]: string;
-}
 
 export const modeToDescription: ModeToDescription = {
     Normal: "Modes without excessively modifiers, usually connected to nexus. (except Portal)",
@@ -25,23 +22,42 @@ export const regions: Region[] = [
     "US Central", "Oceania", "Asia"
 ]
 
-export const keys = {
-    id: {}, // code ID, ???
-    server: {}, // server id, ???
-    mode: {}, // Gamemode object, ???
-    tank: {}, // tank class query, match if includes insensitively
-    build: {}, // Tank build, ???
-    score: {}, // raw score integer, Comparison operation
-    runtime: {}, // raw runtime seconds integer, comparison operatio
+export type ShortKey = typeof indexToKey[number]
+
+export const indexToKey = [
+    "id", // code ID, ???
+    "server", // server id, ???
+    "mode", // Gamemode object, ???
+    "tank", // tank class query, match if includes insensitively
+    "build", // Tank build, ???
+    "score", // raw score integer, Comparison operation
+    "runtime", // raw runtime seconds integer, comparison operatio
                // add a mode readable way to do this after (ex.: >=[1d 15h])
-    kills: {}, // not yet implemented, implement simple comparison operation
-    assists: {}, // not yet implemented, implement simple comparison operation
-    bosses: {}, // not yet implemented, implement simple comparison operation
-    polygons: {}, // not yet implemented, implement simple comparison operation
-    custom: {}, // not yet implemented, implement simple comparison operation
-    creation: {}, // implement unix timestamp comparison and >=[1d 15h] (relative now to creation time)
-    token: {} // why the fuck why would we match the token
-};
+    "kills", // not yet implemented, implement simple comparison operation
+    "assists", // not yet implemented, implement simple comparison operation
+    "bosses", // not yet implemented, implement simple comparison operation
+    "polygons", // not yet implemented, implement simple comparison operation
+    "custom", // not yet implemented, implement simple comparison operation
+    "creation", // implement unix timestamp comparison and >=[1d 15h] (relative now to creation time)
+    "token" // why the fuck why would we match the token
+] as const;
+
+export const keyToAttrname = {
+    id: "ID",
+    server: "server",
+    mode: "mode",
+    tank: "tankClass",
+    build: "build",
+    score: "rawScore",
+    runtime: "runtimeSeconds",
+    kills: "kills",
+    assists: "assists",
+    bosses: "bossKills",
+    polygons: "polygonsDestroyed",
+    custom: "customKills",
+    creation: "creationTime",
+    token: "safetyToken"
+} as const;
 
 function getScreenshots(target: Path): [Path | null, Path | null] {
     const files = target.iterDir(i => i.isFile() && i.suffix != ".txt");
@@ -58,11 +74,11 @@ function getScreenshots(target: Path): [Path | null, Path | null] {
 
 }
 
-function interrogate(target: Path): SaveStructure {
-    const codeFile = target.join("code.txt");
+function interrogateBottom(bottom: Path): SaveStructure {
+    const codeFile = bottom.join("code.txt");
+
     if (!codeFile.exists()) 
-        // there has to be a better way
-        throw new Error(`Save ${codeFile} doesnt exist.`)
+        throw new Error(`Code file ${codeFile} doesn't exist.`)
 
     const text = codeFile.readText();
     const res = SaveCode.validate(text);
@@ -72,10 +88,32 @@ function interrogate(target: Path): SaveStructure {
     }
 
     const code = new SaveCode(text);
+    
+    const [windowed, fullscreen] = getScreenshots(bottom);
 
-    const [windowed, fullscreen] = getScreenshots(target);
+    return {code, path: bottom, windowed, fullscreen}
+}
 
-    return {code, path: target, windowed, fullscreen}
+function interrogateTop(top: Path): AnySave {
+    const codeFile = top.join("code.txt");
+
+    let code: undefined | SaveCode;
+    if (codeFile.exists()) {
+        const text = codeFile.readText();
+        const res = SaveCode.validate(text);
+        if (res.state == "err") {
+            // same here
+            throw new Error(`Invalid code "${text}" of file "${codeFile}": "${res.message}"`)
+        }
+        code = new SaveCode(text);
+    }
+    
+    const [windowed, fullscreen] = getScreenshots(top);
+
+    /** Grab the history in a clean way. */
+    const history = top.iterDir(i => i.isDir()).map(bottom => interrogateBottom(bottom))
+
+    return {code, path: top, windowed, fullscreen, history}
 }
 
 interface IDToSave {
@@ -94,7 +132,7 @@ export class SaveCollection {
     /** Temporary filter attribute, {@link SaveCollection.filterSaves} */
     draft: IDToSave
     /** Special Ended runs sub. */
-    endedRuns: IDToSave
+    //endedRuns: SaveEndedRun[]
     /** Path to ended runs directory. */
     endedRunsPath: Path
 
@@ -102,38 +140,38 @@ export class SaveCollection {
         return this.saves;
     }
 
+    get savesArr() {
+        return Object.values(this.saves);
+    }
+
+    // TODO include ended runs
     constructor(target: Path) {
         this.target = target;
         this.subs = modes;
         this.pathSubs = [];
         this.draft = {};
         this.saves = {};
-        this.endedRuns = {};
+        // this.endedRuns = [];
         this.endedRunsPath = this.target.join("Ended Runs");
 
         for (let save of this.loadSubs(...this.subs)) {
-            this.saves[save.code.ID] = save;
+            if (!save.code) throw new Error(`Code file of save ${save.path} doesn't exist.`)
+            this.saves[save.code.ID]
         }
 
-        for (let endedRun of this.loadSubs("Ended Runs")) {
-            this.endedRuns[endedRun.code.ID] = endedRun;
-        }
+        //for (let endedSave of this.loadSubs("Ended Runs")) {
+        //    if (endedSave.code) throw Error(`Save ${endedSave.path} is an Ended Run but has code ${endcode}.`)
+        //    this.endedRuns.push(endedSave);
+        //}
     }
 
-    private *loadSubs(...subs: (string | Path)[]): Generator<Save, void, any> {
+    private *loadSubs(...subs: (string | Path)[]): Generator<AnySave, void, any> {
         for (let mode of subs) {
             let path = this.target.join(mode);
             this.pathSubs.push(path);
 
             for (let save of path.iterDir(i => i.isDir())) {
-
-                const history: SaveStructure[] = [];
-                for (let oldSave of save.iterDir(i => i.isDir())) {
-                    history.push(interrogate(oldSave));
-                }
-                
-                const { code, path, windowed, fullscreen } = interrogate(save);
-                yield { code, path, windowed, fullscreen, history }
+                yield interrogateTop(save);
             }
         }
     }
@@ -150,7 +188,7 @@ export class SaveCollection {
      * @param ID The ID of the target save to discard.
      * @returns The discarded save captured by its ID.
      */
-    discard(ID: string) {
+    discard(ID: string): Save {
         let save = this.getSaveByID(ID);
         if (!save) {
             throw new Error(`Save with id ${ID} doesn't exist.`)
@@ -160,7 +198,7 @@ export class SaveCollection {
         let newPath = this.endedRunsPath.join(path.name)
         path.rename(newPath)
 
-        this.endedRuns[ID] = save;
+        // this.endedRuns[ID] = save;
         delete this.saves[ID]
         return save;
     }
@@ -168,11 +206,12 @@ export class SaveCollection {
     // filtering, searching, querying...
 
     filterSaves(includeEndedRuns?: boolean) {
-        if (includeEndedRuns) {
-            this.draft = {...this.saves, ...this.endedRuns};
-        } else {
-            this.draft = this.saves;
-        }
+        //if (includeEndedRuns) {
+        //    this.draft = {...this.saves, ...this.endedRuns};
+        //} else {
+        //    this.draft = this.saves;
+        //}
+        this.draft = this.saves;
         return this;
     }
 
@@ -187,7 +226,7 @@ export class SaveCollection {
         .forEach(save => {delete this.draft[save.code.ID]})
     }
 
-    byScreenshotCount(countFunc: CompiledFunc) {
+    byScreenshotCount(countFunc: NumOpFunc) {
         this.filterByCallback(save => {
             let total = 0;
             if (save.windowed) total++;
@@ -197,19 +236,6 @@ export class SaveCollection {
         return this;
     }
 
-    // byTankClassQuery(tankClassQuery: string) {
-    //    const transform = (s: string) => s
-    //        .toLowerCase()
-    //        .replace(/[ |-]/g, "");
-    //
-    //    tankClassQuery = transform(tankClassQuery)
-
-    //    this.draft = this.draft.filter(save => {
-    //        return transform(save.code.tankClass).includes(tankClassQuery)
-    //    });
-    //    return this;
-    //}
-
     byDirSortedMode(mode: DirSortedMode[]) {
         this.filterByCallback(save => {
             return mode.includes(save.code.dirSortedMode)
@@ -217,11 +243,12 @@ export class SaveCollection {
         return this;
     }
 
-    byCodePartKey<K extends keyof typeof keys>(key: K, value: typeof keys[K]) {
-
+    byCodePartKey<K extends PickedCodeKeys>(pair: [K, (statVal: SaveCode[K]) => boolean]) {
+        const [key, predicate] = pair;
+        this.filterByCallback(save => predicate(save.code[key]))
     }
 
-    byHistoryCount(historyCount: CompiledFunc) {
+    byHistoryCount(historyCount: NumOpFunc) {
         this.filterByCallback(save => historyCount(save.history.length))
         return this;
     }
@@ -242,7 +269,8 @@ export class SaveCollection {
             screenshots,
             dirSortedMode,
             history,
-            region
+            region,
+            codeParts
         } = options;
 
         this.filterSaves(includeEndedRuns);
@@ -250,6 +278,7 @@ export class SaveCollection {
         if (dirSortedMode != null) this.byDirSortedMode(dirSortedMode);
         if (history != null) this.byHistoryCount(history);
         if (region != null) this.byRegion(region);
+        if (codeParts != null) codeParts.forEach(part => this.byCodePartKey(part))
         return this.finishFilter();
     }
 }

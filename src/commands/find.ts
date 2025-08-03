@@ -1,9 +1,11 @@
-import { ActionRowBuilder, ButtonBuilder, InteractionReplyOptions, SlashCommandBuilder, StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder } from "discord.js";
-
+import { 
+    ActionRowBuilder, InteractionReplyOptions, SlashCommandBuilder, 
+    StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder 
+} from "discord.js";
 import { Command, DirSortedMode, Region, SaveQueryOptions } from "./utilities/types";
-import saveCollection, { arrasSaves, modes, modeToDescription, regions, SaveCollection } from './utilities/saves';
+import saveCollection, { modes, modeToDescription, regions } from './utilities/saves';
 import sliceEmbeds from "./utilities/embedpager";
-import { InteractionCompiler } from "./utilities/oper";
+import { parseIntOper, parseGenericCodeMatch, InteractionCompiler } from "./utilities/oper";
 
 const command: Command = {
     payload: new SlashCommandBuilder()
@@ -43,31 +45,25 @@ const command: Command = {
         const includeEnded = options.getBoolean("include-ended-runs") || false
         let screenshotExpr = options.getString("screenshot-count")
         let dirSortedMode = options.getString("sub-mode") as DirSortedMode
-        let tankClassQuery = options.getString("tank-class")
         let historyExpr = options.getString("history-count")
-        let scoreExpr = options.getString("score");
-        let runtimeExpr = options.getString("runtime-seconds");
         let region = options.getString("region") as Region;
+        let codeMatchExpr = options.getString("match-code");
 
-        let codeMatcher = options.getString("match-code");
-
-        let ssFunc = compiler.compile(screenshotExpr);
+        let ssFunc = compiler.compileNumOp(screenshotExpr);
         if (ssFunc == false) return;
 
-        let historyFunc = compiler.compile(historyExpr);
+        let historyFunc = compiler.compileNumOp(historyExpr);
         if (historyFunc == false) return;
 
-        let scoreFunc = compiler.compile(scoreExpr);
-        if (scoreFunc == false) return;
-
-        let runtimeFunc = compiler.compile(runtimeExpr);
-        if (runtimeFunc == false) return;
+        let codeParts = compiler.compileCodeMatch(codeMatchExpr);
+        if (codeParts == false) return;
 
         let searchOptions: SaveQueryOptions = {
             screenshots: ssFunc,
             history: historyFunc,
             dirSortedMode: [dirSortedMode],
-            region
+            region,
+            codeParts
         }
 
         let results = saveCollection.querySaves(

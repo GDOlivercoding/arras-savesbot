@@ -45,17 +45,12 @@ function resolveRestore(interaction: ChatInputCommandInteraction): SaveStructure
         interaction.editReply(items.map(i => i.toString()).join(" "))
     } 
 
-    let selectedModes: DirSortedMode[] = [];
-
-    if (code.dirSortedMode == "Newdreads") {
-        selectedModes.push("Newdreads", "Normal")
-    } else {
-        selectedModes.push(code.dirSortedMode);
-    }
-
-    let targetRestore = saveCollection.saves.find(save => {
-        return save.code.ID == code.ID && save.code.innerCode != code.innerCode
-    })
+    let targetRestore = saveCollection
+        .filterSaves()
+        .finishFilter()
+        .find(save => {
+            return save.code.ID == code.ID && save.code.innerCode != code.innerCode
+        })
 
     if (!targetRestore) {
         // No structure update

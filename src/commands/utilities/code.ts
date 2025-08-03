@@ -118,6 +118,8 @@ export class SaveCode {
         if (codeParts.length !== 14) 
             return err(`Part length should be 14 and not ${codeParts.length}`);
 
+        //console.log(codeParts);
+
         /** @returns {{state: "ok" | "err"; message: string}} */
         function regexCheck(): { state: "ok" | "err"; message: string; } {
             let codeID = /([\d|a-z]+)/

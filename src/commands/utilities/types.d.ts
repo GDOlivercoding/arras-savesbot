@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js"
 import { SaveCode } from "./code"
 import { Path } from "pathobj/tspath"
+import { keyToAttrname } from "./saves"
 
 // commands 
 
@@ -10,7 +11,7 @@ interface Command {
     test(): boolean
 }
 
-// saves and strucutres
+// saves and structures
 
 type MakeOptional<T> = {
     [P in keyof T]?: T[P] | null
@@ -21,34 +22,77 @@ export type DirSortedMode = 'Normal' | 'Growth' | 'Arms Race' | 'Olddreads' | 'N
 export type Region = "Europe" | "US West" | "US Central" | "Oceania" | "Asia"
 export type RegionChar = "e" | "w" | "c" | "o" | "a"
 
-export type SaveStructure = {
+/** Bare structure of save, usually present as a history save */
+export interface SaveStructure {
+    /** Parsed and validated code of `path.join("code.txt")` file. */
     code: SaveCode
+    /** Path pointing to the directory this save belongs to. */
     path: Path
+    /** Path pointing to the windowed screenshot of this save (optional). */
     windowed: Path | null
+    /** Path pointing to the fullscreen screenshot of this save (optional). */
     fullscreen: Path | null
 }
 
-export type Save = SaveStructure & { history: SaveStructure[] }
+/** Top level save, the current version of save history. */
+export interface Save extends SaveStructure {
+    history: SaveStructure[]
+}
 
-export type SaveOrSaveStruct = SaveStructure & { history?: SaveStructure[] }
+/** Save or Save history */
+export interface SaveOrSaveStruct extends SaveStructure {
+    history?: SaveStructure[]
+}
+
+/** a Top level save of an ended run */
+export interface SaveEndedRun extends Save {
+    code: undefined
+}
+
+export type AnySave = Save | SaveEndedRun
 
 export type SaveQueryOptions = MakeOptional<{
-    screenshots: CompiledFunc
+    screenshots: NumOpFunc
     dirSortedMode: DirSortedMode[]
-    history: CompiledFunc
+    history: NumOpFunc
     region: Region
+    codeParts: CodePartPair[]
 }>
 
 // operator syntax
 
 export type OperFunc = (statVal: number, userVal: number) => boolean
-export type CompiledFunc = (statVal: number) => boolean
+export type NumOpFunc = (statVal: number) => boolean
 
 // map for find.ts
 
 export type ModeToDescription = {
     [K in DirSortedMode]: string;
 }
+
+export type PickedCodeKeys = 
+    | "ID" 
+    | "server" 
+    | "mode"
+    | "tankClass"
+    | "build"
+    | "rawScore"
+    | "runtimeSeconds"
+    | "kills"
+    | "assists"
+    | "bossKills"
+    | "polygonsDestroyed"
+    | "customKills"
+    | "creationTime"
+    | "safetyToken"
+
+export type AttrnameToCompiler = {
+    [K in keyof Pick<SaveCode, PickedCodeKeys>]: (userVal: string) => (statVal: SaveCode[K]) => boolean
+}
+
+// TODO tighten these types later.
+export type CodePartFunc = (statVal: string | number | Server | Gamemode | Build | Date) => boolean
+export type CodePartPair = [PickedCodeKeys, CodePartFunc]
 
 /**
  * Keys interface captures the key's name and the type of parameter
@@ -57,7 +101,7 @@ export type ModeToDescription = {
 export interface Keys {
     id: never // code ID, ???
     server: never // server id, ???
-    // region: {} // region NAME, strictly match for NAME // non code fields are going to be speciaů
+    // \region: {} // region NAME, strictly match for NAME // non code fields are going to be special
     mode: never // Gamemode object, ???
     tank: string // tank class query, match if includes insensitively
     build: never // Tank build, ???
