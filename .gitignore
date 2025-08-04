@@ -1,3 +1,8 @@
+/node_modules
+_*
+**/*.test.*
+*.png
+
 # Logs
 logs
 *.log
@@ -137,10 +142,3 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
-
-/node_modules
-_*
-**/*.test.*
-.env
-!.env.example
-*.png

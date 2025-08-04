@@ -1,32 +1,29 @@
-import "dotenv/config";
-import { commands } from "./get-commands";
-import { Client, GatewayIntentBits, REST, Routes, MessageMentions } from 'discord.js';
+import "dotenv/config"
+import { commands } from "./get-commands"
+import { Client, GatewayIntentBits, REST, Routes } from "discord.js"
 
+// eslint-disable-next-line prefer-const
 for (let [name, cmd] of Object.entries(commands)) {
     if (!cmd.test()) {
-        throw new Error(`Command test of ${name} has failed.`);
+        throw new Error(`Command test of ${name} has failed.`)
     }
 }
 
-const rest = new REST({version: "10"}).setToken(process.env.TOKEN || "MISSING");
-rest.put(
-    Routes.applicationCommands(process.env.APP_ID || "MISSING"), 
-    {body: Object.values(commands).map(cmd => cmd.payload.toJSON())}
+const rest = new REST({ version: "10" }).setToken(
+    process.env.TOKEN || "MISSING"
 )
-.then(() => console.log("Successfully synced commands"));
+rest.put(Routes.applicationCommands(process.env.APP_ID || "MISSING"), {
+    body: Object.values(commands).map((cmd) => cmd.payload.toJSON()),
+}).then(() => console.log("Successfully synced commands"))
 
+const client = new Client({
+    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent],
+})
 
-const client = new Client({ 
-    intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.MessageContent
-    ]
-});
+client.once("ready", async (client) => {
+    console.log("Ready!", client.user.tag)
 
-client.once("ready", async client => {
-    console.log("Ready!", client.user.tag);
-
-    const channel = await client.channels.fetch("1395076755274072116");
+    const channel = await client.channels.fetch("1395076755274072116")
     if (channel && channel.isSendable()) {
         channel.send("Ready!")
     } else {
@@ -34,9 +31,9 @@ client.once("ready", async client => {
     }
 })
 
-client.on('interactionCreate', interaction => {
-    if (!interaction.isChatInputCommand()) return;
+client.on("interactionCreate", (interaction) => {
+    if (!interaction.isChatInputCommand()) return
     commands[interaction.commandName].execute(interaction)
-});
+})
 
-client.login(process.env.TOKEN);
+client.login(process.env.TOKEN)

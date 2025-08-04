@@ -1,6 +1,6 @@
-import { ChatInputCommandInteraction } from "discord.js";
+import { ChatInputCommandInteraction } from "discord.js"
 import { AttrnameToCompiler, CodePartPair, NumOpFunc, OperFunc } from "./types"
-import { ShortKey, indexToKey, keyToAttrname } from "./saves";
+import { ShortKey, indexToKey, keyToAttrname } from "./saves"
 
 const opToFunc: {
     [key: string]: OperFunc
@@ -9,18 +9,24 @@ const opToFunc: {
     "<": (statVal, userVal) => statVal < userVal,
     "<=": (statVal, userVal) => statVal <= userVal,
     ">=": (statVal, userVal) => statVal >= userVal,
-}   
+}
 
-const aroundFunc = (statVal: number, userVal: number, rangeBoundary: number) => {
-    return statVal <= (userVal + rangeBoundary) && statVal >= (userVal - rangeBoundary)
-};
+const aroundFunc = (
+    statVal: number,
+    userVal: number,
+    rangeBoundary: number
+) => {
+    return (
+        statVal <= userVal + rangeBoundary && statVal >= userVal - rangeBoundary
+    )
+}
 
 const rangeFunc = (statVal: number, min: number, max: number) => {
     return statVal >= min && statVal <= max
 }
 
-const re_matchGeneric = /^(?<oper>[><]=?)\D*(?<value>\d+)$/;    
-const re_matchAround = /^<(?<range>\d+)>(?<value>\d+)$/;
+const re_matchGeneric = /^(?<oper>[><]=?)\D*(?<value>\d+)$/
+const re_matchAround = /^<(?<range>\d+)>(?<value>\d+)$/
 const re_matchRange = /^<(?<min>\d+)\D*-\D*(?<max>\d+)>$/
 const re_matchSingleSlot = /^(?<key>[a-z]+|\d+);(?<value>.+)$/
 
@@ -30,113 +36,125 @@ export class InteractionCompiler {
     constructor(interaction: ChatInputCommandInteraction) {
         this.interaction = interaction
     }
-    
-    compileNumOp(expr: string | null): false | NumOpFunc | undefined {
-        if (expr == null) return 
 
-        let func = parseIntOper(expr);
+    /**
+     * Compile a number operation.
+     * @param expr The expression, either a string or null if not defined.
+     * @returns false: Compiling the expression failed, undefined: `expr`
+     * was passed in as `null`, NumOrOp: Success
+     */
+    compileNumOp(expr: string | null): false | NumOpFunc | undefined {
+        if (expr == null) return
+
+        const func = parseIntOper(expr)
         if (!func) {
-            this.interaction.reply(`Invalid pattern ${expr}.`);
-            return false;
+            this.interaction.reply(`Invalid pattern ${expr}.`)
+            return false
         }
 
-        return func;
+        return func
     }
 
     compileCodeMatch(expr: string | null): false | CodePartPair[] | undefined {
-        if (expr == null) return;
+        if (expr == null) return
         try {
             return parseGenericCodeMatch(expr)
         } catch (error) {
-            this.interaction.reply(`An error has occured while parsing code match pattern: ${error}`);
-            return false;
+            this.interaction.reply(
+                `An error has occured while parsing code match pattern: ${error}`
+            )
+            return false
         }
     }
 }
 
 export function parseGenericCodeMatch(expr: string): CodePartPair[] {
     expr = expr.replaceAll(" ", "")
-    if (!expr) return [];
+    if (!expr) return []
 
-    let exprArr = expr.split("],[")
+    const exprArr = expr.split("],[")
     exprArr[0] = exprArr[0].replace(/^\[/, "")
     const last = exprArr.length - 1
     exprArr[last] = exprArr[last].replace(/\]$/, "")
 
-    let results: CodePartPair[] = [];
-    for (let pair of exprArr) {
-        const res = re_matchSingleSlot.exec(pair);
-        if (!res || !res.groups) throw new Error(`Failed to match '${pair}'`);
+    const results: CodePartPair[] = []
+    for (const pair of exprArr) {
+        const res = re_matchSingleSlot.exec(pair)
+        if (!res || !res.groups) throw new Error(`Failed to match '${pair}'`)
 
         // here we received the raw name attr
-        let key = res.groups.key;   
-        let value = res.groups.value;
+        let key = res.groups.key
+        const value = res.groups.value
 
         // if its an index, get the attr name
         if (!isNaN(parseInt(key))) {
-            let keyIndex = parseInt(key);
+            const keyIndex = parseInt(key)
             key = indexToKey[keyIndex]
 
-        // Here then find ONLY 1 attr that contains the key
+            // Here then find ONLY 1 attr that contains the key
         } else {
-            let results = indexToKey.filter(val => val.includes(key))
+            const results = indexToKey.filter((val) => val.includes(key))
 
             // no results found
-            if (results.length == 0) 
-                throw new Error(`Key '${key}' of pair '${pair}' doesn't match any attr.`);
+            if (results.length == 0)
+                throw new Error(
+                    `Key '${key}' of pair '${pair}' doesn't match any attr.`
+                )
 
             // too many results found
             if (results.length > 1) {
-                let attrs = results.join(", ");
-                throw new Error(`key '${key}' of pair '${pair}' matches multiple attrs: ${attrs}`);
+                const attrs = results.join(", ")
+                throw new Error(
+                    `key '${key}' of pair '${pair}' matches multiple attrs: ${attrs}`
+                )
             }
 
             // get the assigned result
-            key = results[0];
+            key = results[0]
         }
 
-        let targetKey = key as ShortKey;
-        let targetAttr = keyToAttrname[targetKey];
+        const targetKey = key as ShortKey
+        const targetAttr = keyToAttrname[targetKey]
         /** We pick the compiler and compile it with the value. */
-        let func = attrnameToCompiler[targetAttr](value);
+        const func = attrnameToCompiler[targetAttr](value)
         results.push([targetAttr, func])
     }
 
-    return results;
+    return results
 }
 
 export function parseIntOper(expr: string): NumOpFunc | null {
-    expr = expr.replace(/[ |,|.]/g, "");
+    expr = expr.replace(/[ |,|.]/g, "")
 
-    let res: number;
-    if (!isNaN(res = parseInt(expr))) {
-        return statVal => statVal == res
+    let res: number
+    if (!isNaN((res = parseInt(expr)))) {
+        return (statVal) => statVal == res
     }
 
-    const genRes = re_matchGeneric.exec(expr);
+    const genRes = re_matchGeneric.exec(expr)
     if (genRes && genRes.groups) {
-        let userVal = parseInt(genRes.groups.value);
-        let operFunc = opToFunc[genRes.groups.oper];
-        return statVal => operFunc(statVal, userVal);
+        const userVal = parseInt(genRes.groups.value)
+        const operFunc = opToFunc[genRes.groups.oper]
+        return (statVal) => operFunc(statVal, userVal)
     }
 
-    const aroundRes = re_matchAround.exec(expr);
+    const aroundRes = re_matchAround.exec(expr)
     if (aroundRes && aroundRes.groups) {
-        let userVal = parseInt(aroundRes.groups.value);
-        let range = parseInt(aroundRes.groups.range);
+        const userVal = parseInt(aroundRes.groups.value)
+        const range = parseInt(aroundRes.groups.range)
 
-        return statVal => aroundFunc(statVal, userVal, range);
+        return (statVal) => aroundFunc(statVal, userVal, range)
     }
 
-    const rangeRes = re_matchRange.exec(expr);
+    const rangeRes = re_matchRange.exec(expr)
     if (rangeRes && rangeRes.groups) {
-        let min = parseInt(rangeRes.groups.min);
-        let max = parseInt(rangeRes.groups.max);
+        const min = parseInt(rangeRes.groups.min)
+        const max = parseInt(rangeRes.groups.max)
 
-        return statVal => rangeFunc(statVal, min, max);
+        return (statVal) => rangeFunc(statVal, min, max)
     }
 
-    return null;
+    return null
 }
 
 /**
@@ -146,45 +164,47 @@ export function parseIntOper(expr: string): NumOpFunc | null {
  */
 function createIntOperFunc(name: string) {
     return (userVal: string) => {
-        let expr = parseIntOper(userVal);
-        if (!expr) throw Error(`${name} code part value '${userVal}' is not parseable as type NumberOrOp.`)
+        const expr = parseIntOper(userVal)
+        if (!expr)
+            throw Error(
+                `${name} code part value '${userVal}' is not parseable as type NumberOrOp.`
+            )
         return expr
     }
 }
 
 export const attrnameToCompiler: AttrnameToCompiler = {
-    ID: userVal => id => userVal == id,
-    server: userVal => server => userVal == server.id, // TODO possibly modify
-    mode: userVal => mode => true, // TODO
-    tankClass: userVal => {
-        const transform = (s: string) => s
-            .toLowerCase()
-            .replace(/[ -]/g, "");
-    
+    ID: (userVal) => (id) => userVal == id,
+    server: (userVal) => (server) => userVal == server.id, // TODO possibly modify
+    mode: (userVal) => (mode) => true, // TODO
+    tankClass: (userVal) => {
+        const transform = (s: string) => s.toLowerCase().replace(/[ -]/g, "")
+
         userVal = transform(userVal)
 
-        return tankClass => transform(tankClass).includes(userVal)
+        return (tankClass) => transform(tankClass).includes(userVal)
     },
-    build: userVal => build => true, // TODO
-    rawScore: createIntOperFunc('score'),
-    runtimeSeconds: createIntOperFunc('runtime'),
-    kills: createIntOperFunc('kills'),
-    assists: createIntOperFunc('assists'),
-    bossKills: createIntOperFunc('bosses'),
-    polygonsDestroyed: createIntOperFunc('polygons'),
-    customKills: createIntOperFunc('custom'),
-    creationTime: userVal => {
+    build: (userVal) => (build) => true, // TODO
+    rawScore: createIntOperFunc("score"),
+    runtimeSeconds: createIntOperFunc("runtime"),
+    kills: createIntOperFunc("kills"),
+    assists: createIntOperFunc("assists"),
+    bossKills: createIntOperFunc("bosses"),
+    polygonsDestroyed: createIntOperFunc("polygons"),
+    customKills: createIntOperFunc("custom"),
+    creationTime: (userVal) => {
         // here we either accept a unix timestamp as a number operation
         // or a date then convertible to a number operation (<[2024y 7m 5d])
         if (!isNaN(parseInt(userVal))) {
             // i want this part executed immediately.
-            const wrapped = createIntOperFunc('creation')(userVal)
-            return statValDate => wrapped(Math.floor(statValDate.getTime() / 1000))
+            const wrapped = createIntOperFunc("creation")(userVal)
+            return (statValDate) =>
+                wrapped(Math.floor(statValDate.getTime() / 1000))
         }
 
         throw Error("Date comparisons aren't yet implemented.")
         // here compile the pattern and return back to number operations
-        return creationTime => true
+        return (creationTime) => true
     },
-    safetyToken: userVal => safetyToken => userVal == safetyToken
-};
+    safetyToken: (userVal) => (safetyToken) => userVal == safetyToken,
+}

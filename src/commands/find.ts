@@ -1,131 +1,184 @@
-import { 
-    ActionRowBuilder, InteractionReplyOptions, SlashCommandBuilder, 
-    StringSelectMenuBuilder, StringSelectMenuInteraction, StringSelectMenuOptionBuilder 
-} from "discord.js";
-import { Command, DirSortedMode, Region, SaveQueryOptions } from "./utilities/types";
-import saveCollection, { modes, modeToDescription, regions } from './utilities/saves';
-import sliceEmbeds from "./utilities/embedpager";
-import { parseIntOper, parseGenericCodeMatch, InteractionCompiler } from "./utilities/oper";
+import {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    ActionRowBuilder,
+    ChatInputCommandInteraction,
+    InteractionEditReplyOptions,
+    InteractionReplyOptions,
+    SlashCommandBuilder,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    StringSelectMenuBuilder,
+    StringSelectMenuInteraction,
+    StringSelectMenuOptionBuilder,
+} from "discord.js"
+import {
+    Command,
+    DirSortedMode,
+    Region,
+    SaveQueryOptions,
+} from "./utilities/types"
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import saveCollection, {
+    modes,
+    modeToDescription,
+    regions,
+} from "./utilities/saves"
+import sliceEmbeds from "./utilities/embedpager"
+import { InteractionCompiler } from "./utilities/oper"
 
 const command: Command = {
     payload: new SlashCommandBuilder()
-    .setName("find")
-    .setDescription("Search the saves.")
-    .addBooleanOption(o => o
-        .setName("include-ended-runs")
-        .setDescription("Whether to include delete runs in the search.")
-    )
-    .addStringOption(o => o
-        .setName("screenshot-count")
-        .setDescription("Filter saves by the number of screenshots.")
-    )
-    .addStringOption(o => o
-        .setName("sub-mode")
-        .setDescription("Filter by the sub-mode (dirSortedMode) of the save. **Editable later**")
-        .addChoices(modes.map(value => {return {name: value, value}}))
-    )
-    .addStringOption(o => o 
-        .setName("history-count")
-        .setDescription("Filter by the number of past saves. Supports comparison.")
-    )
-    .addStringOption(o => o
-        .setName("region")
-        .setDescription("The region of the server where it was saved.")
-        .addChoices(regions.map(value => {return {name: value, value}}))
-    )
-    .addStringOption(o => o
-        .setName("match-code")
-        .setDescription("Match any part of the code. do /find-help for help.")
-    )
-    ,
+        .setName("find")
+        .setDescription("Search the saves.")
+        .addBooleanOption((o) =>
+            o
+                .setName("include-ended-runs")
+                .setDescription("Whether to include delete runs in the search.")
+        )
+        .addStringOption((o) =>
+            o
+                .setName("screenshot-count")
+                .setDescription("Filter saves by the number of screenshots.")
+        )
+        .addStringOption((o) =>
+            o
+                .setName("sub-mode")
+                .setDescription(
+                    "Filter by the sub-mode (dirSortedMode) of the save. **Editable later**"
+                )
+                .addChoices(
+                    modes.map((value) => {
+                        return { name: value, value }
+                    })
+                )
+        )
+        .addStringOption((o) =>
+            o
+                .setName("history-count")
+                .setDescription(
+                    "Filter by the number of past saves. Supports comparison."
+                )
+        )
+        .addStringOption((o) =>
+            o
+                .setName("region")
+                .setDescription("The region of the server where it was saved.")
+                .addChoices(
+                    regions.map((value) => {
+                        return { name: value, value }
+                    })
+                )
+        )
+        .addStringOption((o) =>
+            o
+                .setName("match-code")
+                .setDescription(
+                    "Match any part of the code. do /find-help for help."
+                )
+        ),
+    /** This is a wrapper of {@link saveCollection.querySaves}. */
     async execute(interaction) {
-        const compiler = new InteractionCompiler(interaction);
-        const options = interaction.options;
+        const compiler = new InteractionCompiler(interaction)
+        const options = interaction.options
 
         const includeEnded = options.getBoolean("include-ended-runs") || false
-        let screenshotExpr = options.getString("screenshot-count")
-        let dirSortedMode = options.getString("sub-mode") as DirSortedMode
-        let historyExpr = options.getString("history-count")
-        let region = options.getString("region") as Region;
-        let codeMatchExpr = options.getString("match-code");
+        const screenshotExpr = options.getString("screenshot-count")
+        const dirSortedMode = options.getString("sub-mode") as
+            | DirSortedMode
+            | undefined
+        const historyExpr = options.getString("history-count")
+        const region = options.getString("region") as Region | undefined
+        const codeMatchExpr = options.getString("match-code")
 
-        let ssFunc = compiler.compileNumOp(screenshotExpr);
-        if (ssFunc == false) return;
+        const ssFunc = compiler.compileNumOp(screenshotExpr)
+        if (ssFunc == false) return
 
-        let historyFunc = compiler.compileNumOp(historyExpr);
-        if (historyFunc == false) return;
+        const historyFunc = compiler.compileNumOp(historyExpr)
+        if (historyFunc == false) return
 
-        let codeParts = compiler.compileCodeMatch(codeMatchExpr);
-        if (codeParts == false) return;
+        const codeParts = compiler.compileCodeMatch(codeMatchExpr)
+        if (codeParts == false) return
 
-        let searchOptions: SaveQueryOptions = {
+        const searchOptions: SaveQueryOptions = {
             screenshots: ssFunc,
             history: historyFunc,
-            dirSortedMode: [dirSortedMode],
+            dirSortedMode: dirSortedMode,
             region,
-            codeParts
+            codeParts,
         }
 
-        let results = saveCollection.querySaves(
-            searchOptions,
-            includeEnded
-        );
+        console.log(searchOptions)
 
-        const dirSortedModeSelectMenu = new StringSelectMenuBuilder()
-            .setCustomId("dir-sorted-mode-menu")
-            .setPlaceholder(dirSortedMode ? "<DirSortedMode>" : dirSortedMode)
-            .addOptions(modes.map(mode => {
-                return new StringSelectMenuOptionBuilder()
-                .setLabel(mode)
-                .setValue(mode)
-                .setDescription(modeToDescription[mode])
-            }))
+        const results = saveCollection.querySaves(searchOptions, includeEnded)
 
-        const row = new ActionRowBuilder<StringSelectMenuBuilder>()
-            .addComponents(dirSortedModeSelectMenu)
+        console.log("result: ", results.length)
 
-        const fieldSize = 25;
+        // const dirSortedModeSelectMenu = new StringSelectMenuBuilder()
+        //     .setCustomId("dir-sorted-mode-menu")
+        //     .setPlaceholder("<DirSortedMode>")
+        //     .addOptions(modes.map(mode => {
+        //         return new StringSelectMenuOptionBuilder()
+        //         .setLabel(mode)
+        //         .setValue(mode)
+        //         .setDescription(modeToDescription[mode])
+        //     }))
 
-        let embeds = sliceEmbeds(
-            Object.values(results).map(
-            save => {return {name: save.path.name, value: save.code.toString(), inline: true}}),
-            i => `A saves search done by ${interaction.user.globalName} page ${i % fieldSize}:`
-        );
+        // const row = new ActionRowBuilder<StringSelectMenuBuilder>()
+        //     .addComponents(dirSortedModeSelectMenu)
 
-        const sendingOptions: InteractionReplyOptions & { withResponse: true } = {
-            withResponse: true,
+        const fieldSize = 25
+
+        const embeds = sliceEmbeds(
+            results.map((save) => {
+                return {
+                    name: save.path.name,
+                    value: save.code.toString(),
+                    inline: true,
+                }
+            }),
+            (i) =>
+                `A saves search done by ${interaction.user.globalName} page ${i % fieldSize}:`
+        )
+
+        // const sendingOptions: InteractionReplyOptions & { withResponse: true } = {
+        //     withResponse: true,
+        //     embeds: [embeds[0]],
+        //     components: [row],
+        // }
+
+        const sendingOptions: InteractionReplyOptions = {
             embeds: [embeds[0]],
-            components: [row],
         }
-               
-        let response = await interaction.reply(sendingOptions);
 
-        const collectorFilter = (i: any) => i.user.id === interaction.user.id;
+        await interaction.reply(sendingOptions)
 
-        try {  
-            const confirmation = await response.resource!.message!.awaitMessageComponent({ 
-                filter: collectorFilter, time: 60_000 
-            }) as StringSelectMenuInteraction;
+        // const collectorFilter = (i) => i.user.id === interaction.user.id;
 
-            if (confirmation.customId != "dir-sorted-mode-menu") return;
+        // try {
+        //     const confirmation = await response.resource!.message!.awaitMessageComponent({
+        //         filter: collectorFilter, time: 60_000
+        //     }) as StringSelectMenuInteraction;
 
-            searchOptions.dirSortedMode = confirmation.values as DirSortedMode[]
-            results = saveCollection.querySaves(searchOptions, includeEnded);
+        //     if (confirmation.customId != "dir-sorted-mode-menu") return;
 
-            embeds = sliceEmbeds(
-                results.map(
-                save => {return {name: save.path.name, value: save.code.toString(), inline: true}}),
-                i => `A saves search done by ${interaction.user.globalName} page ${i % fieldSize}:`
-            );
+        //     searchOptions.dirSortedMode = confirmation.values as DirSortedMode[]
+        //     results = saveCollection.querySaves(searchOptions, includeEnded);
 
-            sendingOptions.embeds = [embeds[0]];
-            interaction.editReply(sendingOptions as any)
+        //     embeds = sliceEmbeds(
+        //         results.map(
+        //         save => {return {name: save.path.name, value: save.code.toString(), inline: true}}),
+        //         i => `A saves search done by ${interaction.user.globalName} page ${i % fieldSize}:`
+        //     );
 
-        } catch {}
+        //     sendingOptions.embeds = [embeds[0]];
+        //     interaction.editReply(sendingOptions as InteractionEditReplyOptions)
+
+        // } catch {
+        //     /* empty */
+        // }
     },
     test() {
-        return true;
+        return true
     },
 }
 
-export default command;
+export default command

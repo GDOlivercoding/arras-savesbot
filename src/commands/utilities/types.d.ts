@@ -1,13 +1,12 @@
 import { ChatInputCommandInteraction } from "discord.js"
 import { SaveCode } from "./code"
 import { Path } from "pathobj/tspath"
-import { keyToAttrname } from "./saves"
 
-// commands 
+// commands
 
 interface Command {
-    payload: { toJSON(): any; [x: string]: any }
-    execute(interaction: ChatInputCommandInteraction): Promise<any>
+    payload: unknown
+    execute(interaction: ChatInputCommandInteraction): Promise<unknown>
     test(): boolean
 }
 
@@ -17,7 +16,12 @@ type MakeOptional<T> = {
     [P in keyof T]?: T[P] | null
 }
 
-export type DirSortedMode = 'Normal' | 'Growth' | 'Arms Race' | 'Olddreads' | 'Newdreads';
+export type DirSortedMode =
+    | "Normal"
+    | "Growth"
+    | "Arms Race"
+    | "Olddreads"
+    | "Newdreads"
 
 export type Region = "Europe" | "US West" | "US Central" | "Oceania" | "Asia"
 export type RegionChar = "e" | "w" | "c" | "o" | "a"
@@ -53,7 +57,7 @@ export type AnySave = Save | SaveEndedRun
 
 export type SaveQueryOptions = MakeOptional<{
     screenshots: NumOpFunc
-    dirSortedMode: DirSortedMode[]
+    dirSortedMode: DirSortedMode
     history: NumOpFunc
     region: Region
     codeParts: CodePartPair[]
@@ -67,12 +71,12 @@ export type NumOpFunc = (statVal: number) => boolean
 // map for find.ts
 
 export type ModeToDescription = {
-    [K in DirSortedMode]: string;
+    [K in DirSortedMode]: string
 }
 
-export type PickedCodeKeys = 
-    | "ID" 
-    | "server" 
+export type PickedCodeKeys =
+    | "ID"
+    | "server"
     | "mode"
     | "tankClass"
     | "build"
@@ -87,11 +91,15 @@ export type PickedCodeKeys =
     | "safetyToken"
 
 export type AttrnameToCompiler = {
-    [K in keyof Pick<SaveCode, PickedCodeKeys>]: (userVal: string) => (statVal: SaveCode[K]) => boolean
+    [K in keyof Pick<SaveCode, PickedCodeKeys>]: (
+        userVal: string
+    ) => (statVal: SaveCode[K]) => boolean
 }
 
 // TODO tighten these types later.
-export type CodePartFunc = (statVal: string | number | Server | Gamemode | Build | Date) => boolean
+export type CodePartFunc = (
+    statVal: string | number | Server | Gamemode | Build | Date
+) => boolean
 export type CodePartPair = [PickedCodeKeys, CodePartFunc]
 
 /**
@@ -107,7 +115,7 @@ export interface Keys {
     build: never // Tank build, ???
     score: number // raw score integer, Comparison operation
     runtime: number // raw runtime seconds integer, comparison operatio
-               // add a mode readable way to do this after (ex.: >=[1d 15h])
+    // add a mode readable way to do this after (ex.: >=[1d 15h])
     kills: number // not yet implemented, implement simple comparison operation
     assists: number // not yet implemented, implement simple comparison operation
     bosses: number // not yet implemented, implement simple comparison operation
@@ -115,23 +123,23 @@ export interface Keys {
     custom: number // not yet implemented, implement simple comparison operation
     creation: Date // implement unix timestamp comparison and >=[1d 15h] (relative literal now to creation time)
     token: never // probably actually never // why the fuck why would we match the token
-};
+}
 
 // /.../settings.json structure
 export type Data = {
     fullscreen_ss: string
     windowed_ss: string
     single_ss: string
-    pic_export: 0 | 1 | 2 
+    pic_export: 0 | 1 | 2
     confirmation: boolean
     ss_dir: string // Maybe path conversion
     open_dirname: boolean
     /**
      * code: iso format
      */
-    unclaimed: {[code: string]: string} 
+    unclaimed: { [code: string]: string }
     /**
      * path
      */
-    restore: string | null 
+    restore: string | null
 }
