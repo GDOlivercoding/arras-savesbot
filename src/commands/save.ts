@@ -40,12 +40,12 @@ const command: Command = {
         let fullscreen: Attachment
 
         if (ss1.size >= ss2.size) {
-            ;[windowed, fullscreen] = [ss1, ss2]
+            [windowed, fullscreen] = [ss1, ss2]
         } else {
-            ;[windowed, fullscreen] = [ss2, ss1]
+            [windowed, fullscreen] = [ss2, ss1]
         }
 
-        let promise = interaction.reply(`Saving ${code} ...`)
+        const waitUntilReplied = interaction.reply(`Saving ${code} ...`)
 
         try {
             const text = await savescore(
@@ -55,8 +55,9 @@ const command: Command = {
                 fullscreen,
                 restore == null ? true : restore
             )
-            await promise
+            await waitUntilReplied
             interaction.editReply("Saved score successfully.\n" + text.written)
+
         } catch (error) {
             const replyFuncChoice = interaction.replied
                 ? interaction.editReply
@@ -64,7 +65,7 @@ const command: Command = {
             replyFuncChoice(`Something went wrong: ${error}`)
         }
     },
-    test: savetest,
+    test: savetest
 }
 
 export default command

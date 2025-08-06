@@ -8,10 +8,7 @@ const command: Command = {
         .setName("parsemode")
         .setDescription("Parse a gamemode string.")
         .addStringOption((option) =>
-            option
-                .setName("mode")
-                .setDescription("Kill yourself immediately.")
-                .setRequired(true)
+            option.setName("mode").setDescription("mode").setRequired(true)
         ),
     async execute(interaction) {
         const mode = interaction.options.getString("mode", true)
@@ -29,7 +26,7 @@ const command: Command = {
     },
     test() {
         return !!parse
-    },
+    }
 }
 
 export default command

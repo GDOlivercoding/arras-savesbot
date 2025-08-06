@@ -1,9 +1,13 @@
+// systematical globals
+import { finished, Readable } from "stream"
+
+// packages
 import { Attachment, ChatInputCommandInteraction } from "discord.js"
 import { Path } from "pathobj/tspath"
-import { SaveCode } from "./code.js"
-import { Data, DirSortedMode, Save, SaveStructure } from "./types"
-import { finished, Readable } from "stream"
-import fs from "fs"
+
+// local
+import { SaveCode } from "./code"
+import { Data, Save, SaveStructure } from "./types"
 import saveCollection from "./saves"
 
 const home = Path.home()
@@ -23,9 +27,10 @@ let savePath: Path
 const now = new Date()
 
 async function downloadFile(url: string, fp: Path) {
-    const res = (await fetch(url)) as any
+    const res = (await fetch(url))
     if (!res.body) throw new Error("Body missing.")
-    const fileStream = fs.createWriteStream(fp.toString(), { flags: "wx" })
+    const fileStream = fp.createWriteStream({ flags: "wx" })
+    // FIXME: Incompatible types
     finished(Readable.fromWeb(res.body).pipe(fileStream), (err) => {
         if (err) throw err
     })
@@ -35,11 +40,11 @@ async function addScreenshots(
     windowed: Attachment | null,
     fullscreen: Attachment | null
 ): Promise<[Path | null, Path | null]> {
-    let [windName, fullName] = [
+    const [windName, fullName] = [
         windowed ? savePath.join(windowed.name).withStem("windowed") : null,
         fullscreen
             ? savePath.join(fullscreen.name).withStem("fullscreen")
-            : null,
+            : null
     ]
 
     if (windowed && windName) downloadFile(windowed.url, windName)
@@ -51,19 +56,16 @@ async function addScreenshots(
 function resolveRestore(
     interaction: ChatInputCommandInteraction
 ): SaveStructure[] {
-    const send = (...items: any[]) => {
+
+    // ffs with these types man
+    const send = (...items: {toString(): string}[]) => {
         console.info(...items)
         interaction.editReply(items.map((i) => i.toString()).join(" "))
     }
 
-    let targetRestore = saveCollection
-        .filterSaves()
-        .finishFilter()
-        .find((save) => {
-            return (
-                save.code.ID == code.ID && save.code.innerCode != code.innerCode
-            )
-        })
+    const targetRestore = saveCollection.savesArr.find((save) => {
+        return save.code.ID == code.ID && save.code.innerCode != code.innerCode
+    })
 
     if (!targetRestore) {
         // No structure update
@@ -72,14 +74,14 @@ function resolveRestore(
 
     send("Resolving restore", targetRestore.path.name)
 
-    let target = targetRestore.path
+    const target = targetRestore.path
 
     targetRestore.history.forEach((save) => {
-        let dir = save.path
+        const dir = save.path
         dir.rename(savePath.join(dir.name))
     })
 
-    let newLocation = target.rename(savePath.join(target.name))
+    const newLocation = target.rename(savePath.join(target.name))
 
     send("Resolved restore, new: ", newLocation)
 
@@ -173,6 +175,6 @@ export async function main(
         windowed,
         history,
         path: savePath,
-        written: writeToLogdata(windowed, fullscreen),
+        written: writeToLogdata(windowed, fullscreen)
     }
 }

@@ -12,13 +12,13 @@ const command: Command = {
     async execute(interaction) {
         interaction.reply({
             flags: "Ephemeral",
-            content: path.readText(),
+            content: path.readText()
         })
     },
 
     test() {
         return path.exists()
-    },
+    }
 }
 
 export default command

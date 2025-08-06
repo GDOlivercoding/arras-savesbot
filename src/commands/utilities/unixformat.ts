@@ -12,5 +12,5 @@ export default {
     /** Wed 09  July 01:47:57 */
     wwww_DDmmmmYYYY_HHMM: "F",
     /** Relative to the point in time. (ex.: 8 hours ago, 2 years ago) */
-    relative: "R",
+    relative: "R"
 }

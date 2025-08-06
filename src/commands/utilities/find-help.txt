@@ -1,69 +1,15 @@
-/find Command Help
+# [/find command help](https://discord.com/channels/1395076754816761956/1402404042197696713/1402766298127274005)
 
-Filter and find saves based on options.
+# command: /find
+
+**Description**:
+Filter and find saves based on options and code parts.
 
 # **Options:**
 NOTE: All code parts are matchable in the match-code options.
-- **screenshot-count**: Filter saves by the number of screenshots. type: NumberOrNumeralOperation 
-- **sub-mode**: Filter by the sub-mode (dirSortedMode) of the save. Choose from available modes. type: Literal string
-- **history-count**: Filter by the number of past saves. Supports comparison expressions. type: NumberOrNumeralOperation 
-- **region**: Filter by the server region where the save was made. type: Literal string
 
-- **match-code**: Match code parts. See below for details. type: CodePartExpression
-
-# Value Types
-
-**number**: Any decimal (123) or hexadecimal (0x*) integer
-
-**NumberOrNumeralOperation:** number, (<|>|<=|>=)number, <number>number, <number-number>
-option 1: number, this will check for strict equality.
-option 2: Prefix operator before number: >, <, >= and <= (ex.: >5, <=50).
-option 3: `<number>number`, e.g., `<5>100` matches values between 95 and 105.
-option 4: `<number-number>`, e.g., `<10-20>` matches values between 10 and 20 (inclusive).
-
-You are free to use commas and periods wherever for readability.
-They won't change how the command functions.
-
-**DateOperation:** (<|>|<=|>=)\[(\d+(y|mon|d|h|min|s) ?)+\]
-An operator followed by [] filled with numbers with a measurement suffix.
-NumberOrNumeralOperation but replace number with \[(\d+(y|mon|d|h|min|s) ?)+\]
-(ex.: >=[2024y 6mon 99h], <[2mon]>[2024y 7mon], <[2024y]-[2025y]>)
-Unspecified values default to current UTC values.
-
-**CodePartExpression**
-All non-code parts are their own options (like region).
-Use the `match-code` option to match code parts:
-syntax: [key;value], [key;value], ...
-
-key may be a string which one of the options below contain (kills, kill(s), (po)lygon(s)), 
-or an index of the part in the code [0-13].
-
-- Example: `[score;>1,000,000]` or `[6;>1,000,000]`
-- Multiple pairs can be separated by commas: `[score;>=1,000,000],[kills;<10]`
-
-**Value types for each option:** 
-(index, name, type, notes)
-- 0: id: unsupported, to get code by id use /view-save
-- 1: server: string (server ID)
-- 2: mode: string (gamemode)
-- 3: tank: string, both user input and tank names get lower cased, and spaces and dashes get removed
-- 4: build: string (tank build)
-- 5: score: numberOrOp
-- 6: runtime: numberOrOp, time spent alive in seconds
-- 7: kills: numberOrOp
-- 8: assists: numberOrOp
-- 9: bosses: numberOrOp, boss kills or assists
-- 10: polygons: numberOrOp, polygons destroyed
-- 11: custom: numberOrOp, special "dread" kills
-- 12: creation: numberOrOp with unix timestamp (>=1754080892) or **DateOperation**
-- 13: token: unsupported
-
----
-
-**Command Examples:**
-- `/find screenshot-count:>=1 score:<5.000.000`
-- `/find tank-class:sniper runtime-seconds:>3600`
-- `/find history-count:0 score:<200,000>1,000,000`
-- `/find match-code:[score;>=1,000,000],[kills;<20]`
-
-Results are shown in pages, with up to 25 saves per page. Only the first 10
+- **screenshot-count**: Filter saves by the number of screenshots. **type**: [**NumberOperation**](https://discord.com/channels/1395076754816761956/1402655824530247712/1402766407304872008)
+- **sub-mode**: Filter by the sub-mode (dirSortedMode) of the save. **type**: A choice of strings
+- **history-count**: Filter by the number of past saves. Supports comparison expressions. **type**: [**NumberOperation**](https://discord.com/channels/1395076754816761956/1402655824530247712/1402766407304872008)
+- **region**: Filter by the server region where the save was made. **type**: A choice of strings
+- **match-code**: Match code parts. See the parameter type for details.  **type**: [**CodePartExpression**](https://discord.com/channels/1395076754816761956/1402655824530247712/1402769566186340465)

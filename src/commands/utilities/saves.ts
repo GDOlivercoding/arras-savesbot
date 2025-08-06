@@ -9,7 +9,7 @@ import {
     SaveStructure,
     ModeToDescription,
     PickedCodeKeys,
-    AnySave,
+    AnySave
 } from "./types"
 
 export const arrasSaves = new Path(
@@ -20,7 +20,7 @@ export const modes: DirSortedMode[] = [
     "Growth",
     "Arms Race",
     "Olddreads",
-    "Newdreads",
+    "Newdreads"
 ]
 
 export const modeToDescription: ModeToDescription = {
@@ -30,7 +30,7 @@ export const modeToDescription: ModeToDescription = {
         "If the mode has the Arms Race prefix, lower in the hierarchy than growth.",
     Olddreads: "The Old Dreadnoughts gamemode, any mode with 'old' in it.",
     Newdreads:
-        "Any v2 Dreadnought, this also includes any runs in the new Labyrinth.",
+        "Any v2 Dreadnought, this also includes any runs in the new Labyrinth."
 }
 
 export const regions: Region[] = [
@@ -38,7 +38,7 @@ export const regions: Region[] = [
     "US West",
     "US Central",
     "Oceania",
-    "Asia",
+    "Asia"
 ]
 
 export type ShortKey = (typeof indexToKey)[number]
@@ -58,7 +58,7 @@ export const indexToKey = [
     "polygons", // not yet implemented, implement simple comparison operation
     "custom", // not yet implemented, implement simple comparison operation
     "creation", // implement unix timestamp comparison and >=[1d 15h] (relative now to creation time)
-    "token", // why the fuck why would we match the token
+    "token" // why the fuck why would we match the token
 ] as const
 
 export const keyToAttrname = {
@@ -75,7 +75,7 @@ export const keyToAttrname = {
     polygons: "polygonsDestroyed",
     custom: "customKills",
     creation: "creationTime",
-    token: "safetyToken",
+    token: "safetyToken"
 } as const
 
 function getScreenshots(target: Path): [Path | null, Path | null] {
@@ -181,10 +181,10 @@ export class SaveCollection {
         for (const save of this.loadSubs(...this.subs)) {
             if (!save.code)
                 throw new Error(`Code file of save ${save.path} doesn't exist.`)
-            console.log(`${save.code}`)
             this.saves[save.code.ID] = save
         }
-        console.log(`Collected ${Object.keys(this.saves).length} saves.`)
+
+        console.log(`Collected ${this.savesArr.length} saves.`)
 
         //for (let endedSave of this.loadSubs("Ended Runs")) {
         //    if (endedSave.code) throw Error(`Save ${endedSave.path} is an Ended Run but has code ${endcode}.`)

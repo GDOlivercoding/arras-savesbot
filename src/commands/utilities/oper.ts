@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction } from "discord.js"
 import { AttrnameToCompiler, CodePartPair, NumOpFunc, OperFunc } from "./types"
 import { ShortKey, indexToKey, keyToAttrname } from "./saves"
+import { parse } from "arras-parser"
 
 const opToFunc: {
     [key: string]: OperFunc
@@ -8,7 +9,7 @@ const opToFunc: {
     ">": (statVal, userVal) => statVal > userVal,
     "<": (statVal, userVal) => statVal < userVal,
     "<=": (statVal, userVal) => statVal <= userVal,
-    ">=": (statVal, userVal) => statVal >= userVal,
+    ">=": (statVal, userVal) => statVal >= userVal
 }
 
 const aroundFunc = (
@@ -173,10 +174,21 @@ function createIntOperFunc(name: string) {
     }
 }
 
-export const attrnameToCompiler: AttrnameToCompiler = {
+const attrnameToCompiler: AttrnameToCompiler = {
     ID: (userVal) => (id) => userVal == id,
     server: (userVal) => (server) => userVal == server.id, // TODO possibly modify
-    mode: (userVal) => (mode) => true, // TODO
+    mode: (userVal) => {
+        // Whether to match if target has all attributes
+        // or if target has only these attributes
+        let strictMode = false
+        if (userVal.startsWith("!")) {
+            strictMode = true
+            userVal = userVal.replace(/^!/, "")
+        }
+
+        const userMode = parse(userVal)
+        return (mode) => userMode.compare(mode, strictMode)
+    }, // TODO
     tankClass: (userVal) => {
         const transform = (s: string) => s.toLowerCase().replace(/[ -]/g, "")
 
@@ -184,7 +196,50 @@ export const attrnameToCompiler: AttrnameToCompiler = {
 
         return (tankClass) => transform(tankClass).includes(userVal)
     },
-    build: (userVal) => (build) => true, // TODO
+    build: (userVal) => {
+        let endAnchor = false;
+        if (userVal.endsWith("$")) {
+            userVal = userVal.replace(/\$$/, "");
+            endAnchor = true;
+        }
+
+        const parts = userVal.split("/")
+
+        const parsedParts = parts.map((part) => {
+            // empty part means match any, like js comments.
+            if (!part) return () => true
+            const result = parseIntOper(part)
+            if (!result) {
+                throw Error(`'${result}' is an invalid number operation.`)
+            }
+            return result
+        })
+
+        // Doing it this way because i want to do as much in the
+        // compilation rather than execution.
+        if (!endAnchor) {
+            return (build) => {
+                const buildParts = build.parts
+                for (let i = 0; i < parsedParts.length; i++) {
+                    const part = buildParts[i]
+                    if (!part || !parsedParts[i](part)) return false
+                }
+
+                return true
+            }
+        } else {
+            return (build) => {
+                const buildParts = build.parts
+                // here, `i` the amount of steps away from the end of the array.
+                for (let i = 0; i < parsedParts.length + 1; i++) {
+                    const part = buildParts[buildParts.length - i]
+                    if (!part || !parsedParts[parsedParts.length - i](part)) return false
+                }
+
+                return true
+            }
+        }
+    }, // TODO
     rawScore: createIntOperFunc("score"),
     runtimeSeconds: createIntOperFunc("runtime"),
     kills: createIntOperFunc("kills"),
@@ -204,7 +259,7 @@ export const attrnameToCompiler: AttrnameToCompiler = {
 
         throw Error("Date comparisons aren't yet implemented.")
         // here compile the pattern and return back to number operations
-        return (creationTime) => true
+        //return (creationTime) => true
     },
-    safetyToken: (userVal) => (safetyToken) => userVal == safetyToken,
-}
+    safetyToken: (userVal) => (safetyToken) => userVal == safetyToken
+} as const;

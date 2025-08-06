@@ -46,7 +46,7 @@ export class SaveCode {
             polygonsDestroyed,
             customKills,
             creationTime,
-            safetyToken,
+            safetyToken
         ] = parts
 
         this.ID = codeID
@@ -93,7 +93,7 @@ export class SaveCode {
             [
                 now.toISOString().split("T")[0],
                 this.formattedScore,
-                this.tankClass,
+                this.tankClass
             ].join(" ")
         )
     }
@@ -149,7 +149,7 @@ export class SaveCode {
                 bossKills,
                 polygonsDestroyed,
                 customKills,
-                unixTimestamp, // seconds since 1st of jan 1970 midnight UTC
+                unixTimestamp // seconds since 1st of jan 1970 midnight UTC
             ] = digitOnly
 
             const safetyToken = /(.+)/
@@ -168,7 +168,7 @@ export class SaveCode {
                 polygonsDestroyed,
                 customKills,
                 unixTimestamp,
-                safetyToken,
+                safetyToken
             ]
 
             for (let index = 0; index < regexes.length; index++) {
@@ -234,7 +234,7 @@ export class Server {
         w: "US West",
         c: "US Central",
         a: "Asia",
-        o: "Oceania",
+        o: "Oceania"
     }
 
     /** The server id passed in the constructor minus its trailing hashtag. */
@@ -279,6 +279,10 @@ export class Build {
         // Maybe add more?
     }
 
+    valueOf() {
+        return this.build
+    }
+
     toString() {
         return this.build
     }
@@ -289,7 +293,7 @@ const suffixes: { [key: number | string]: string } = {
     7: "m",
     8: "m",
     9: "m",
-    10: "b",
+    10: "b"
 }
 
 /**

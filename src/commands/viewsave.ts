@@ -47,7 +47,7 @@ const command: Command = {
         const files: AttachmentBuilder[] = []
         if (target.windowed) {
             const { path, windowed } = target
-            const buf = target.windowed.readBuffer()
+            const buf = windowed.readBuffer()
             files.push(
                 new AttachmentBuilder(buf)
                     .setName(
@@ -97,7 +97,7 @@ const command: Command = {
     },
     test() {
         return true
-    },
+    }
 }
 
 export default command

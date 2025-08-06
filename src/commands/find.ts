@@ -1,27 +1,30 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+// ^ remove after re-adding string select menu.
+
 import {
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     ActionRowBuilder,
     ChatInputCommandInteraction,
     InteractionEditReplyOptions,
     InteractionReplyOptions,
     SlashCommandBuilder,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     StringSelectMenuBuilder,
     StringSelectMenuInteraction,
-    StringSelectMenuOptionBuilder,
+    StringSelectMenuOptionBuilder
 } from "discord.js"
+
 import {
     Command,
     DirSortedMode,
     Region,
-    SaveQueryOptions,
+    SaveQueryOptions
 } from "./utilities/types"
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
+
 import saveCollection, {
     modes,
     modeToDescription,
-    regions,
+    regions
 } from "./utilities/saves"
+
 import sliceEmbeds from "./utilities/embedpager"
 import { InteractionCompiler } from "./utilities/oper"
 
@@ -103,7 +106,7 @@ const command: Command = {
             history: historyFunc,
             dirSortedMode: dirSortedMode,
             region,
-            codeParts,
+            codeParts
         }
 
         console.log(searchOptions)
@@ -131,8 +134,8 @@ const command: Command = {
             results.map((save) => {
                 return {
                     name: save.path.name,
-                    value: save.code.toString(),
-                    inline: true,
+                    value: `${save.code}`,
+                    inline: true
                 }
             }),
             (i) =>
@@ -146,10 +149,10 @@ const command: Command = {
         // }
 
         const sendingOptions: InteractionReplyOptions = {
-            embeds: [embeds[0]],
+            embeds: [embeds[0]]
         }
 
-        await interaction.reply(sendingOptions)
+        interaction.reply(sendingOptions)
 
         // const collectorFilter = (i) => i.user.id === interaction.user.id;
 
@@ -178,7 +181,7 @@ const command: Command = {
     },
     test() {
         return true
-    },
+    }
 }
 
 export default command

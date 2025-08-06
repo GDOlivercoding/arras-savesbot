@@ -47,7 +47,7 @@ const command: Command = {
             `Score: ${code.formattedScore}`,
             `Kills/Million: ${(((code.kills + code.assists / 25) / code.rawScore) * 1_000_000).toFixed(2)}`,
             `Saved at: ${code.creationTimestamp(unixFormat.DDmmmmYYYY_HHMM)}, ${code.creationTimestamp(unixFormat.relative)}`,
-            `Safety token: ${blur ? "||" + code.safetyToken + "||" : code.safetyToken}`,
+            `Safety token: ${blur ? "||" + code.safetyToken + "||" : code.safetyToken}`
         ]
 
         interaction.reply(contents.join("\n"))
@@ -55,7 +55,7 @@ const command: Command = {
     test() {
         // just making sure the object is defined
         return !!SaveCode
-    },
+    }
 }
 
 export default command

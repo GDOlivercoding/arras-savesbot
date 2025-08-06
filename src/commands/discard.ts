@@ -24,7 +24,7 @@ const command: Command = {
     },
     test() {
         return true
-    },
+    }
 }
 
 export default command
