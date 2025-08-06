@@ -6,6 +6,8 @@ Keys: y (year), mon (month), d (day), h (hour), min (minute), s (second) and ms 
 
 Take the default values of NOW of UTC
 
+**Not actually, seems like it isn't that simple! Looks like i should only play around year defaulting that sounds about right.**
+
 Replace them if user specifies said keys
 
 Then convert to a unix timestamp and compile as a number expression
@@ -25,3 +27,19 @@ Filters like mode and server and not done properly or at all.
 ## Tighten code match types
 
 tighten `CodePartFunc` and `CodePartPair` types in types.d.ts
+
+## Anchoring build matching to the end with $
+
+self explanatory, as in regex: /expr$/, done just needs testing
+
+## ~~Test code matching for `build`~~
+
+Finished, it works
+
+## Debug tspath's SingleArgType
+
+because it doesnt work for some reason
+
+## Fix C:\Users\Uzivatel\Desktop\Langs\js+ts\node.js\discord.js\savesbot\src\commands\utilities\savescore.ts:34:31
+
+because `ReadableStream<Uint8Array>` is not compatible with `ReadableStream<any>`

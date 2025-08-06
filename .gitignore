@@ -1,7 +1,7 @@
-/node_modules
-_*
+**/_*
 **/*.test.*
 *.png
+docs
 
 # Logs
 logs

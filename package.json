@@ -1,27 +1,27 @@
 {
-  "name": "savesbot",
-  "version": "1.0.0",
-  "description": "discord.js saves bot",
-  "license": "ISC",
-  "author": "EclipSyS",
-  "type": "module",
-  "main": "index.ts",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "@types/node": "^24.0.3",
-    "arras-parser": "file:../../../../Python/projects/arras parser",
-    "discord.js": "^14.20.0",
-    "dotenv": "^16.5.0",
-    "pathobj": "file:../../filesys/path",
-    "prettier": "^3.6.2"
-  },
-  "devDependencies": {
-    "@eslint/js": "^9.32.0",
-    "eslint": "^9.32.0",
-    "globals": "^16.3.0",
-    "jiti": "^2.5.1",
-    "typescript-eslint": "^8.38.0"
-  }
+    "name": "savesbot",
+    "version": "1.0.0",
+    "description": "discord.js saves bot",
+    "license": "ISC",
+    "author": "EclipSyS",
+    "type": "module",
+    "main": "index.ts",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "dependencies": {
+        "@types/node": "^24.0.3",
+        "arras-parser": "file:../../../../Python/projects/arras parser",
+        "discord.js": "^14.20.0",
+        "dotenv": "^16.5.0",
+        "pathobj": "file:../../filesys/path",
+        "prettier": "^3.6.2"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.32.0",
+        "eslint": "^9.32.0",
+        "globals": "^16.3.0",
+        "jiti": "^2.5.1",
+        "typescript-eslint": "^8.38.0"
+    }
 }
