@@ -302,7 +302,6 @@ export class SaveCollection {
     finishFilter() {
         const results = Object.values(this.draft)
         this.draft = {}
-        console.log("End: ", results.length)
         return results
     }
 

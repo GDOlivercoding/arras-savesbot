@@ -111,8 +111,6 @@ const command: Command = {
 
         const results = saveCollection.querySaves(searchOptions, includeEnded)
 
-        console.log("result: ", results.length)
-
         // const dirSortedModeSelectMenu = new StringSelectMenuBuilder()
         //     .setCustomId("dir-sorted-mode-menu")
         //     .setPlaceholder("<DirSortedMode>")
