@@ -27,7 +27,7 @@ let savePath: Path
 const now = new Date()
 
 async function downloadFile(url: string, fp: Path) {
-    const res = (await fetch(url))
+    const res = await fetch(url)
     if (!res.body) throw new Error("Body missing.")
     const fileStream = fp.createWriteStream({ flags: "wx" })
     // FIXME: Incompatible types
@@ -56,9 +56,8 @@ async function addScreenshots(
 function resolveRestore(
     interaction: ChatInputCommandInteraction
 ): SaveStructure[] {
-
     // ffs with these types man
-    const send = (...items: {toString(): string}[]) => {
+    const send = (...items: { toString(): string }[]) => {
         console.info(...items)
         interaction.editReply(items.map((i) => i.toString()).join(" "))
     }

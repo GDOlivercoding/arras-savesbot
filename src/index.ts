@@ -2,8 +2,7 @@ import "dotenv/config"
 import { commands } from "./get-commands"
 import { Client, GatewayIntentBits, REST, Routes } from "discord.js"
 
-// eslint-disable-next-line prefer-const
-for (let [name, cmd] of Object.entries(commands)) {
+for (const [name, cmd] of Object.entries(commands)) {
     if (!cmd.test()) {
         throw new Error(`Command test of ${name} has failed.`)
     }

@@ -24,7 +24,7 @@ export class SaveCode {
     safetyToken: string
 
     /**
-     * Construct a new arras.io SaveCode object from a code
+     * Construct a new Arras.io `SaveCode` object from a code
      * @param {string} code The string code
      */
     constructor(code: string) {
@@ -72,7 +72,7 @@ export class SaveCode {
         this.tankClass = tankClass
         this.build = new Build(build)
         this.rawScore = parseInt(rawScore)
-        this.formattedScore = scoreToReadable(rawScore)
+        this.formattedScore = scoreToReadable(this.rawScore)
         this.runtimeSeconds = parseInt(runtimeSeconds)
         this.kills = parseInt(kills)
         this.assists = parseInt(assists)
@@ -126,13 +126,13 @@ export class SaveCode {
             .replace(/^`?\(/, "")
             .replace(/\)`?$/, "")
             .split(":")
+
         if (codeParts.length !== 14)
             return err(`Part length should be 14 and not ${codeParts.length}`)
 
         //console.log(codeParts);
 
-        /** @returns {{state: "ok" | "err"; message: string}} */
-        function regexCheck(): { state: "ok" | "err"; message: string } {
+        function regexCheck(): ReturnType<typeof SaveCode.validate> {
             const codeID = /([\d|a-z]+)/
             const server = /(#[e|w|c|a|o][a-z])/
             const mode = /([\d|a-z]+)/ // Mode is going to get validated later; too hard for regex
@@ -169,7 +169,7 @@ export class SaveCode {
                 customKills,
                 unixTimestamp,
                 safetyToken
-            ]
+            ] as const
 
             for (let index = 0; index < regexes.length; index++) {
                 const re = regexes[index]
@@ -179,7 +179,7 @@ export class SaveCode {
                 // XXX The latter check is VERY important!!!
                 if (!res || res[0] != part) {
                     return err(
-                        `Regex ${re} failed to match ${part}, output: ${res ? res[0] : ""}`
+                        `Regex ${re} failed to match ${part}${res ? `, output: ${res[0]}` : ""}`
                     )
                 }
             }
@@ -235,7 +235,7 @@ export class Server {
         c: "US Central",
         a: "Asia",
         o: "Oceania"
-    }
+    } as const
 
     /** The server id passed in the constructor minus its trailing hashtag. */
     id: string
@@ -251,8 +251,8 @@ export class Server {
         this.id = serverId.replace(/^#/, "")
         this.regionChar = this.id[0] as RegionChar
 
-        if (!"ewcoa".includes(this.regionChar))
-            throw new Error(`Regional character ${this.regionChar} is invalid.`)
+        if (!this.regionChar)
+            throw new Error(`Regional character ${this.id[0]} is invalid.`)
 
         this.region = this.regions[this.regionChar]
         this.isSandbox = this.id.length == 3
@@ -301,7 +301,7 @@ const suffixes: { [key: number | string]: string } = {
  * @param {string | number} score
  * @returns {string}
  */
-function scoreToReadable(score: string | number): string {
+function scoreToReadable(score: number): string {
     // 1_784_485
     const str = score.toString()
 

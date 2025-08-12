@@ -2,10 +2,10 @@
     "name": "savesbot",
     "version": "1.0.0",
     "description": "discord.js saves bot",
-    "license": "ISC",
-    "author": "EclipSyS",
+    "license": "MIT",
+    "author": "Eclipsia",
     "type": "module",
-    "main": "index.ts",
+    "main": "src/index.ts",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"
     },

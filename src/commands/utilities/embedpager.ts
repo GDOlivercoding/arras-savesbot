@@ -1,14 +1,21 @@
 import { APIEmbedField, EmbedBuilder } from "discord.js"
 
+/**
+ * Slice embed fields into embeds of correct size.
+ * @param fields The fields to slice.
+ * @param title A string representing the title, 
+ * or a function that takes the current page index and returns the title.
+ * @returns The slice embeds as {@link EmbedBuilder}s
+ */
 function sliceEmbeds(
     fields: APIEmbedField[],
     title: string | ((index: number) => string)
 ): EmbedBuilder[] {
     let getTitle: (index: number) => string
-    if (title instanceof Function) {
-        getTitle = title
-    } else {
+    if (typeof title == "string") {
         getTitle = () => title
+    } else {
+        getTitle = title
     }
 
     let i = 0

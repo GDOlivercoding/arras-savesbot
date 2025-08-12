@@ -40,9 +40,9 @@ const command: Command = {
         let fullscreen: Attachment
 
         if (ss1.size >= ss2.size) {
-            [windowed, fullscreen] = [ss1, ss2]
+            ;[windowed, fullscreen] = [ss1, ss2]
         } else {
-            [windowed, fullscreen] = [ss2, ss1]
+            ;[windowed, fullscreen] = [ss2, ss1]
         }
 
         const waitUntilReplied = interaction.reply(`Saving ${code} ...`)
@@ -57,7 +57,6 @@ const command: Command = {
             )
             await waitUntilReplied
             interaction.editReply("Saved score successfully.\n" + text.written)
-
         } catch (error) {
             const replyFuncChoice = interaction.replied
                 ? interaction.editReply

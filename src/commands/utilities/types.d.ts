@@ -1,11 +1,11 @@
-import { ChatInputCommandInteraction } from "discord.js"
+import { ChatInputCommandInteraction, SlashCommandOptionsOnlyBuilder } from "discord.js"
 import { SaveCode } from "./code"
 import { Path } from "pathobj/tspath"
 
 // commands
 
 interface Command {
-    payload: unknown
+    payload: SlashCommandOptionsOnlyBuilder
     execute(interaction: ChatInputCommandInteraction): Promise<unknown>
     test(): boolean
 }
@@ -102,28 +102,11 @@ export type CodePartFunc = (
 ) => boolean
 export type CodePartPair = [PickedCodeKeys, CodePartFunc]
 
-/**
- * Keys interface captures the key's name and the type of parameter
- * being passed in.
- */
-export interface Keys {
-    id: never // code ID, ???
-    server: never // server id, ???
-    // \region: {} // region NAME, strictly match for NAME // non code fields are going to be special
-    mode: never // Gamemode object, ???
-    tank: string // tank class query, match if includes insensitively
-    build: never // Tank build, ???
-    score: number // raw score integer, Comparison operation
-    runtime: number // raw runtime seconds integer, comparison operatio
-    // add a mode readable way to do this after (ex.: >=[1d 15h])
-    kills: number // not yet implemented, implement simple comparison operation
-    assists: number // not yet implemented, implement simple comparison operation
-    bosses: number // not yet implemented, implement simple comparison operation
-    polygons: number // not yet implemented, implement simple comparison operation
-    custom: number // not yet implemented, implement simple comparison operation
-    creation: Date // implement unix timestamp comparison and >=[1d 15h] (relative literal now to creation time)
-    token: never // probably actually never // why the fuck why would we match the token
-}
+type DateSuffixes = "y" | "mon" | "d" | "h" | "min" | "s" | "ms"
+
+type DateOperationMap = Partial<{
+    [K in DateSuffixes]: number
+}>
 
 // /.../settings.json structure
 export type Data = {

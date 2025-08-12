@@ -12,9 +12,11 @@ import {
     AnySave
 } from "./types"
 
+/** Path pointing to the local arras saves directory. */
 export const arrasSaves = new Path(
     "C:\\Users\\Uzivatel\\Desktop\\Directory\\content\\Arras.io saves"
 )
+
 export const modes: DirSortedMode[] = [
     "Normal",
     "Growth",
@@ -78,7 +80,7 @@ export const keyToAttrname = {
     token: "safetyToken"
 } as const
 
-function getScreenshots(target: Path): [Path | null, Path | null] {
+export function getScreenshots(target: Path): [Path | null, Path | null] {
     const files = target.iterDir((i) => i.isFile() && i.suffix != ".txt")
     if (!files.length) return [null, null]
     if (files.length == 1) return [files[0], null]
@@ -92,7 +94,7 @@ function getScreenshots(target: Path): [Path | null, Path | null] {
     return [windowed, fullscreen]
 }
 
-function interrogateBottom(bottom: Path): SaveStructure {
+export function interrogateBottom(bottom: Path): SaveStructure {
     const codeFile = bottom.join("code.txt")
 
     if (!codeFile.exists())
@@ -101,7 +103,6 @@ function interrogateBottom(bottom: Path): SaveStructure {
     const text = codeFile.readText()
     const res = SaveCode.validate(text)
     if (res.state == "err") {
-        // same here
         throw new Error(
             `Invalid code ${text} of file ${codeFile}: ${res.message}`
         )
@@ -114,7 +115,7 @@ function interrogateBottom(bottom: Path): SaveStructure {
     return { code, path: bottom, windowed, fullscreen }
 }
 
-function interrogateTop(top: Path): AnySave {
+export function interrogateTop(top: Path): AnySave {
     const codeFile = top.join("code.txt")
 
     let code: undefined | SaveCode
@@ -148,7 +149,7 @@ export class SaveCollection {
     /** The readonly directory target. */
     readonly target: Path
     /** The sub directories of target. */
-    subs: string[]
+    subs: string[] | readonly string[]
     /** The sub directories of target as Path objects. */
     pathSubs: Path[]
     /** The value of this object, an array of collected saves. */
@@ -164,6 +165,7 @@ export class SaveCollection {
         return this.saves
     }
 
+    /** Get the .saves attribute as an Array of its values. */
     get savesArr() {
         return Object.values(this.saves)
     }
@@ -276,16 +278,15 @@ export class SaveCollection {
 
     byDirSortedMode(mode: DirSortedMode) {
         this.filterByCallback((save) => {
-            return mode == save.code.dirSortedMode
+            return mode == save.code.dirSortedMode  
         })
         return this
     }
 
-    byCodePartKey<K extends PickedCodeKeys>(
-        pair: [K, (statVal: SaveCode[K]) => boolean]
+    byCodePartKeys<K extends PickedCodeKeys>(
+        pairs: [K, (statVal: SaveCode[K]) => boolean][]
     ) {
-        const [key, predicate] = pair
-        this.filterByCallback((save) => predicate(save.code[key]))
+        pairs.forEach(([key, predicate]) => this.filterByCallback((save) => predicate(save.code[key])))
     }
 
     byHistoryCount(historyCount: NumOpFunc) {
@@ -306,16 +307,20 @@ export class SaveCollection {
     }
 
     querySaves(options: SaveQueryOptions, includeEndedRuns?: boolean): Save[] {
-        const { screenshots, dirSortedMode, history, region, codeParts } =
-            options
+        const { 
+            screenshots, 
+            dirSortedMode,
+            history, 
+            region, 
+            codeParts 
+        } = options
 
         this.filterSaves(includeEndedRuns)
         if (screenshots != null) this.byScreenshotCount(screenshots)
         if (dirSortedMode != null) this.byDirSortedMode(dirSortedMode)
         if (history != null) this.byHistoryCount(history)
         if (region != null) this.byRegion(region)
-        if (codeParts != null)
-            codeParts.forEach((part) => this.byCodePartKey(part))
+        if (codeParts != null) this.byCodePartKeys(codeParts)
         return this.finishFilter()
     }
 }

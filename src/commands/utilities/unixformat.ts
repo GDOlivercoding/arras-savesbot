@@ -13,4 +13,4 @@ export default {
     wwww_DDmmmmYYYY_HHMM: "F",
     /** Relative to the point in time. (ex.: 8 hours ago, 2 years ago) */
     relative: "R"
-}
+} as const

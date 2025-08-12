@@ -2,6 +2,7 @@ import { ChatInputCommandInteraction } from "discord.js"
 import { AttrnameToCompiler, CodePartPair, NumOpFunc, OperFunc } from "./types"
 import { ShortKey, indexToKey, keyToAttrname } from "./saves"
 import { parse } from "arras-parser"
+import disTypes from "./distyperef"
 
 const opToFunc: {
     [key: string]: OperFunc
@@ -18,7 +19,8 @@ const aroundFunc = (
     rangeBoundary: number
 ) => {
     return (
-        statVal <= userVal + rangeBoundary && statVal >= userVal - rangeBoundary
+        statVal    <= (userVal + rangeBoundary) 
+        && statVal >= (userVal - rangeBoundary)
     )
 }
 
@@ -26,7 +28,7 @@ const rangeFunc = (statVal: number, min: number, max: number) => {
     return statVal >= min && statVal <= max
 }
 
-const re_matchGeneric = /^(?<oper>[><]=?)\D*(?<value>\d+)$/
+const re_matchNumOP = /^(?<oper>[><]=?)\D*(?<value>\d+)$/
 const re_matchAround = /^<(?<range>\d+)>(?<value>\d+)$/
 const re_matchRange = /^<(?<min>\d+)\D*-\D*(?<max>\d+)>$/
 const re_matchSingleSlot = /^(?<key>[a-z]+|\d+);(?<value>.+)$/
@@ -78,10 +80,15 @@ export function parseGenericCodeMatch(expr: string): CodePartPair[] {
     const last = exprArr.length - 1
     exprArr[last] = exprArr[last].replace(/\]$/, "")
 
+    // for consistency
+    const errKeyofPair = (pair: string, key: string, message: string) => {
+        return Error(`Key '${key}' of pair '${pair}' ${message}`)
+    }
+
     const results: CodePartPair[] = []
     for (const pair of exprArr) {
         const res = re_matchSingleSlot.exec(pair)
-        if (!res || !res.groups) throw new Error(`Failed to match '${pair}'`)
+        if (!res || !res.groups) throw new Error(`Failed to match '${pair}' as a pair.`)
 
         // here we received the raw name attr
         let key = res.groups.key
@@ -89,7 +96,10 @@ export function parseGenericCodeMatch(expr: string): CodePartPair[] {
 
         // if its an index, get the attr name
         if (!isNaN(parseInt(key))) {
-            const keyIndex = parseInt(key)
+            const keyIndex = parseInt(key) - 1
+            if (keyIndex < 0 || keyIndex > indexToKey.length - 1)
+                throw errKeyofPair(pair, key, "is out of bounds of [1-14]")
+
             key = indexToKey[keyIndex]
 
             // Here then find ONLY 1 attr that contains the key
@@ -98,16 +108,12 @@ export function parseGenericCodeMatch(expr: string): CodePartPair[] {
 
             // no results found
             if (results.length == 0)
-                throw new Error(
-                    `Key '${key}' of pair '${pair}' doesn't match any attr.`
-                )
+                throw errKeyofPair(pair, key, "doesn't match any attr.")
 
             // too many results found
             if (results.length > 1) {
                 const attrs = results.join(", ")
-                throw new Error(
-                    `key '${key}' of pair '${pair}' matches multiple attrs: ${attrs}`
-                )
+                throw errKeyofPair(pair, key, `matches too many attrs: ${attrs}`)
             }
 
             // get the assigned result
@@ -132,7 +138,7 @@ export function parseIntOper(expr: string): NumOpFunc | null {
         return (statVal) => statVal == res
     }
 
-    const genRes = re_matchGeneric.exec(expr)
+    const genRes = re_matchNumOP.exec(expr)
     if (genRes && genRes.groups) {
         const userVal = parseInt(genRes.groups.value)
         const operFunc = opToFunc[genRes.groups.oper]
@@ -168,13 +174,13 @@ function createIntOperFunc(name: string) {
         const expr = parseIntOper(userVal)
         if (!expr)
             throw Error(
-                `${name} code part value '${userVal}' is not parseable as type NumberOrOp.`
+                `'${name}' code part value '${userVal}' is not parseable as type ${disTypes.NumberOperation}.`
             )
         return expr
     }
 }
 
-const attrnameToCompiler: AttrnameToCompiler = {
+export const attrnameToCompiler: AttrnameToCompiler = {
     ID: (userVal) => (id) => userVal == id,
     server: (userVal) => (server) => userVal == server.id, // TODO possibly modify
     mode: (userVal) => {
@@ -197,10 +203,10 @@ const attrnameToCompiler: AttrnameToCompiler = {
         return (tankClass) => transform(tankClass).includes(userVal)
     },
     build: (userVal) => {
-        let endAnchor = false;
+        let endAnchor = false
         if (userVal.endsWith("$")) {
-            userVal = userVal.replace(/\$$/, "");
-            endAnchor = true;
+            userVal = userVal.replace(/\$$/, "")
+            endAnchor = true
         }
 
         const parts = userVal.split("/")
@@ -210,7 +216,7 @@ const attrnameToCompiler: AttrnameToCompiler = {
             if (!part) return () => true
             const result = parseIntOper(part)
             if (!result) {
-                throw Error(`'${result}' is an invalid number operation.`)
+                throw Error(`'${result}' is an invalid ${disTypes.NumberOperation}.`)
             }
             return result
         })
@@ -218,6 +224,7 @@ const attrnameToCompiler: AttrnameToCompiler = {
         // Doing it this way because i want to do as much in the
         // compilation rather than execution.
         if (!endAnchor) {
+            console.log("Picked start anchor.")
             return (build) => {
                 const buildParts = build.parts
                 for (let i = 0; i < parsedParts.length; i++) {
@@ -228,18 +235,20 @@ const attrnameToCompiler: AttrnameToCompiler = {
                 return true
             }
         } else {
+            console.log("Picked end anchor")
             return (build) => {
                 const buildParts = build.parts
                 // here, `i` the amount of steps away from the end of the array.
-                for (let i = 0; i < parsedParts.length + 1; i++) {
+                for (let i = 1; i < parsedParts.length + 1; i++) {
                     const part = buildParts[buildParts.length - i]
-                    if (!part || !parsedParts[parsedParts.length - i](part)) return false
+                    if (!part || !parsedParts[parsedParts.length - i](part))
+                        return false
                 }
 
                 return true
             }
         }
-    }, // TODO
+    },
     rawScore: createIntOperFunc("score"),
     runtimeSeconds: createIntOperFunc("runtime"),
     kills: createIntOperFunc("kills"),
@@ -262,4 +271,4 @@ const attrnameToCompiler: AttrnameToCompiler = {
         //return (creationTime) => true
     },
     safetyToken: (userVal) => (safetyToken) => userVal == safetyToken
-} as const;
+} as const

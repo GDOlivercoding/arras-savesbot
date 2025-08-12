@@ -1,15 +1,12 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-// ^ remove after re-adding string select menu.
-
 import {
-    ActionRowBuilder,
-    ChatInputCommandInteraction,
-    InteractionEditReplyOptions,
+    //ActionRowBuilder,
+    //ChatInputCommandInteraction,
+    //InteractionEditReplyOptions,
     InteractionReplyOptions,
     SlashCommandBuilder,
-    StringSelectMenuBuilder,
-    StringSelectMenuInteraction,
-    StringSelectMenuOptionBuilder
+    //StringSelectMenuBuilder,
+    //StringSelectMenuInteraction,
+    //StringSelectMenuOptionBuilder
 } from "discord.js"
 
 import {
@@ -21,7 +18,7 @@ import {
 
 import saveCollection, {
     modes,
-    modeToDescription,
+    //modeToDescription,
     regions
 } from "./utilities/saves"
 
@@ -32,11 +29,12 @@ const command: Command = {
     payload: new SlashCommandBuilder()
         .setName("find")
         .setDescription("Search the saves.")
-        .addBooleanOption((o) =>
-            o
-                .setName("include-ended-runs")
-                .setDescription("Whether to include delete runs in the search.")
-        )
+        // TODO
+        //.addBooleanOption((o) =>
+        //    o
+        //        .setName("include-ended-runs")
+        //        .setDescription("Whether to include delete runs in the search.")
+        //)
         .addStringOption((o) =>
             o
                 .setName("screenshot-count")
@@ -83,7 +81,7 @@ const command: Command = {
         const compiler = new InteractionCompiler(interaction)
         const options = interaction.options
 
-        const includeEnded = options.getBoolean("include-ended-runs") || false
+        const includeEnded = false // options.getBoolean("include-ended-runs")
         const screenshotExpr = options.getString("screenshot-count")
         const dirSortedMode = options.getString("sub-mode") as
             | DirSortedMode
@@ -138,8 +136,7 @@ const command: Command = {
                     inline: true
                 }
             }),
-            (i) =>
-                `A saves search done by ${interaction.user.globalName} page ${i % fieldSize}:`
+            (i) => `Found ${results.length} results page ${i % fieldSize}:`
         )
 
         // const sendingOptions: InteractionReplyOptions & { withResponse: true } = {

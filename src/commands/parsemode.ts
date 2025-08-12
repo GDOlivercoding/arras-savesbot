@@ -25,7 +25,15 @@ const command: Command = {
         interaction.reply(`${result}`)
     },
     test() {
-        return !!parse
+        return (
+            parse("am4")
+            && parse("ag1sx17bastion")
+            && parse("w33oldscdreadnoughts")
+            && parse("aeaovergrowth")
+            && parse("2").teamType == "2tdm"
+            && parse("x16layout").mapLayout[0] == "layout"
+            && parse("agrmop").prefixFlags == 126
+        ) 
     }
 }
 

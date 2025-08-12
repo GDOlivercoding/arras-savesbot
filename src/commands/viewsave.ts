@@ -4,25 +4,20 @@ import saveCollection from "./utilities/saves"
 
 const command: Command = {
     payload: new SlashCommandBuilder()
-        .setName("view-save")
-        .setDescription("Get the information of a save.")
-        .addStringOption((o) =>
-            o
-                .setName("code-id")
-                .setDescription("The target code's ID (first element).")
-                .setRequired(true)
-        )
-        .addIntegerOption((o) =>
-            o
-                .setName("history-index")
-                .setDescription("Optional index of the save's history.")
-                .setRequired(false)
-        ),
+    .setName("view-save")
+    .setDescription("Get the information of a save.")
+    .addStringOption(o => o
+        .setName("code-id")
+        .setDescription("The target code's ID (first element).")
+        .setRequired(true)
+    )
+    .addIntegerOption(o => o
+        .setName("history-index")
+        .setDescription("Optional index of the save's history.")
+        .setRequired(false)
+    ),
     async execute(interaction) {
-        const codeID = interaction.options
-            .getString("code-id", true)
-            .trimStart()
-            .trimEnd()
+        const codeID = interaction.options.getString("code-id", true).trim()
         const historyIndex = interaction.options.getInteger("history-index")
 
         const save = saveCollection.getSaveByID(codeID)
@@ -50,12 +45,12 @@ const command: Command = {
             const buf = windowed.readBuffer()
             files.push(
                 new AttachmentBuilder(buf)
-                    .setName(
-                        `windowed-death-screenshot-${path.name}.${windowed.suffix}`
-                    )
-                    .setDescription(
-                        `Windowed death screenshot of Arras.io run ${path.name}.`
-                    )
+                .setName(
+                    `windowed-death-screenshot-${path.name}.${windowed.suffix}`
+                )
+                .setDescription(
+                    `Windowed death screenshot of Arras.io run ${path.name}.`
+                )
             )
         }
 
@@ -89,9 +84,11 @@ const command: Command = {
             `Viewing save with code ${save.code},` +
             ` with ${files.length} screenshot${files.length == 1 ? "" : "s"}.` +
             `\nName: ${save.path.name}\n` +
-            (target.history
-                ? "History:\n" + output.join("\n")
-                : `History index ${historyIndex}.`)
+            (output.length
+                ? "History:\n" + output.join("\n") // there are some history saves
+                : historyIndex != null
+                  ? `History index ${historyIndex}.` // we are currently in a history save
+                  : "") // neither of the above
 
         interaction.reply({ content, files })
     },

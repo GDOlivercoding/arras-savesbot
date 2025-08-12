@@ -28,9 +28,10 @@ Filters like mode and server and not done properly or at all.
 
 tighten `CodePartFunc` and `CodePartPair` types in types.d.ts
 
-## Anchoring build matching to the end with $
+## ~~Anchoring build matching to the end with $~~
 
-self explanatory, as in regex: /expr$/, done just needs testing
+self explanatory, as in regex: /expr$/, done just needs testing, done
+https://discord.com/channels/1395076754816761956/1402656124452212799/1403029718667628574
 
 ## ~~Test code matching for `build`~~
 
@@ -43,3 +44,9 @@ because it doesnt work for some reason
 ## Fix C:\Users\Uzivatel\Desktop\Langs\js+ts\node.js\discord.js\savesbot\src\commands\utilities\savescore.ts:34:31
 
 because `ReadableStream<Uint8Array>` is not compatible with `ReadableStream<any>`
+
+## package.json: @types/node is a dev dependency and make prettier a dev dependency
+
+## ~~Connect to github and push all changes~~
+
+done

@@ -17,7 +17,7 @@ const command: Command = {
 
         try {
             const save = saveCollection.discard(codeid)
-            interaction.reply(`Successfully discarded ${save.code}!`)
+            interaction.reply(`Successfully discarded ${save.path.name}!`)
         } catch (error) {
             return interaction.reply(`${error}`)
         }

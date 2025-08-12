@@ -53,8 +53,7 @@ const command: Command = {
         interaction.reply(contents.join("\n"))
     },
     test() {
-        // just making sure the object is defined
-        return !!SaveCode
+        return true
     }
 }
 
