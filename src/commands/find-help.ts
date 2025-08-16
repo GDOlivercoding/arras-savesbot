@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from "discord.js"
-import { Command } from "./utilities/types"
+import { Command } from "../base/types"
 import { Path } from "pathobj/tspath"
 
 const path = new Path(import.meta.dirname).join("utilities", "find-help.txt")

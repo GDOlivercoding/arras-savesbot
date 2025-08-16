@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction } from "discord.js"
 import { AttrnameToCompiler, CodePartPair, NumOpFunc, OperFunc } from "./types"
 import { ShortKey, indexToKey, keyToAttrname } from "./saves"
 import { parse } from "arras-parser"
-import disTypes from "./distyperef"
+import { distyperef } from "./utils"
 
 const opToFunc: {
     [key: string]: OperFunc
@@ -161,6 +161,7 @@ export function parseIntOper(expr: string): NumOpFunc | null {
         return (statVal) => rangeFunc(statVal, min, max)
     }
 
+    // Failed to match.
     return null
 }
 
@@ -174,7 +175,7 @@ function createIntOperFunc(name: string) {
         const expr = parseIntOper(userVal)
         if (!expr)
             throw Error(
-                `'${name}' code part value '${userVal}' is not parseable as type ${disTypes.NumberOperation}.`
+                `'${name}' code part value '${userVal}' is not parseable as type ${distyperef.NumberOperation}.`
             )
         return expr
     }
@@ -216,7 +217,7 @@ export const attrnameToCompiler: AttrnameToCompiler = {
             if (!part) return () => true
             const result = parseIntOper(part)
             if (!result) {
-                throw Error(`'${result}' is an invalid ${disTypes.NumberOperation}.`)
+                throw Error(`'${result}' is an invalid ${distyperef.NumberOperation}.`)
             }
             return result
         })

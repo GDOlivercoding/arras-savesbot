@@ -5,7 +5,7 @@ import { APIEmbedField, EmbedBuilder } from "discord.js"
  * @param fields The fields to slice.
  * @param title A string representing the title, 
  * or a function that takes the current page index and returns the title.
- * @returns The slice embeds as {@link EmbedBuilder}s
+ * @returns The sliced embeds as {@link EmbedBuilder}s
  */
 function sliceEmbeds(
     fields: APIEmbedField[],
@@ -21,7 +21,7 @@ function sliceEmbeds(
     let i = 0
     const output: EmbedBuilder[] = []
     let curEmbed = new EmbedBuilder()
-    curEmbed.setTitle(getTitle(i))
+    .setTitle(getTitle(i))
 
     const chunkSize = 25
 

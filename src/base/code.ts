@@ -3,17 +3,20 @@ import { Gamemode } from "arras-parser/types"
 import { Path } from "pathobj/tspath"
 import { DirSortedMode, Region, RegionChar } from "./types"
 
+// (6e2121d4:#ef:w33oldscdreadnoughts2:Auto-Tri-Angle:8/8/9/9/9/9/9/7/1/0:10083590:2720:9:3:0:536:9:1728507182:5lZqbl5uVQDOddyJ)
+
 export class SaveCode {
+    // meta
     innerCode: string
     parts: string[]
+
+    // code parts from index 0 to 13
     ID: string
     server: Server
     mode: Gamemode
-    dirSortedMode: DirSortedMode
     tankClass: string
     build: Build
     rawScore: number
-    formattedScore: string
     runtimeSeconds: number
     kills: number
     assists: number
@@ -22,6 +25,10 @@ export class SaveCode {
     customKills: number
     creationTime: Date
     safetyToken: string
+    
+    // other information
+    dirSortedMode: DirSortedMode
+    formattedScore: string
 
     /**
      * Construct a new Arras.io `SaveCode` object from a code
@@ -54,16 +61,13 @@ export class SaveCode {
         this.mode = parse(mode)
 
         const Mode = this.mode
-        // oml
-        /**
-         * Extracted sub mode for the parent directory of the save.
-         * @type {'Normal' | 'Growth' | 'Arms Race' | 'Olddreads' | 'Newdreads'}
-         */
+        
+        /* Extracted sub mode for the parent directory of the save. */
         this.dirSortedMode = Mode.isNormalMode()
             ? "Normal"
             : Mode.prefixHas("Growth")
               ? "Growth"
-              : Mode.prefixHas("Arms_Race")
+              : Mode.prefixHas("Arms Race")
                 ? "Arms Race"
                 : Mode.customWords.includes("old")
                   ? "Olddreads"

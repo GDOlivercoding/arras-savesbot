@@ -252,7 +252,7 @@ export class SaveCollection {
     }
 
     /**
-     * Private inplace operation to delete all saves from {@link SaveCollection.draft}
+     * Inplace operation to delete all saves from {@link SaveCollection.draft}
      * that don't satisfy the specified callback.
      * @param callback The callback to filter the saves by.
      */
@@ -264,6 +264,7 @@ export class SaveCollection {
             .forEach((save) => {
                 delete this.draft[save.code.ID]
             })
+        return this
     }
 
     byScreenshotCount(countFunc: NumOpFunc) {

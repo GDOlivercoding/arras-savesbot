@@ -1,7 +1,7 @@
 import { parse } from "arras-parser"
 import { Gamemode } from "arras-parser/types"
 import { SlashCommandBuilder } from "discord.js"
-import { Command } from "./utilities/types"
+import { Command } from "../base/types"
 
 const command: Command = {
     payload: new SlashCommandBuilder()

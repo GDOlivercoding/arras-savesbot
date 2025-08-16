@@ -1,5 +1,5 @@
 import { Path } from "pathobj/tspath"
-import { Command } from "./commands/utilities/types"
+import { Command } from "./base/types"
 
 const cmdDir = Path.cwd("commands")
 const commands: { [name: string]: Command } = {}

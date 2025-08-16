@@ -1,7 +1,7 @@
 import "dotenv/config"
 import { Attachment, SlashCommandBuilder } from "discord.js"
-import { Command } from "./utilities/types"
-import { main as savescore, test as savetest } from "./utilities/savescore"
+import { Command } from "../base/types"
+import { main as savescore, test as savetest } from "../base/savescore"
 
 const command: Command = {
     payload: new SlashCommandBuilder()

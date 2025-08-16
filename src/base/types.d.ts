@@ -12,7 +12,7 @@ interface Command {
 
 // saves and structures
 
-type MakeOptional<T> = {
+type PartialNullable<T> = {
     [P in keyof T]?: T[P] | null
 }
 
@@ -55,7 +55,7 @@ export interface SaveEndedRun extends Save {
 
 export type AnySave = Save | SaveEndedRun
 
-export type SaveQueryOptions = MakeOptional<{
+export type SaveQueryOptions = PartialNullable<{
     screenshots: NumOpFunc
     dirSortedMode: DirSortedMode
     history: NumOpFunc

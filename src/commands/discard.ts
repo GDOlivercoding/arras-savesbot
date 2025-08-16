@@ -1,6 +1,6 @@
 import { SlashCommandBuilder } from "discord.js"
-import { Command } from "./utilities/types"
-import saveCollection from "./utilities/saves"
+import { Command } from "../base/types"
+import saveCollection from "../base/saves"
 
 const command: Command = {
     payload: new SlashCommandBuilder()

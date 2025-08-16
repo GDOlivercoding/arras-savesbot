@@ -14,16 +14,16 @@ import {
     DirSortedMode,
     Region,
     SaveQueryOptions
-} from "./utilities/types"
+} from "../base/types"
 
 import saveCollection, {
     modes,
     //modeToDescription,
     regions
-} from "./utilities/saves"
+} from "../base/saves"
 
-import sliceEmbeds from "./utilities/embedpager"
-import { InteractionCompiler } from "./utilities/oper"
+import sliceEmbeds from "../base/embedpager"
+import { InteractionCompiler } from "../base/oper"
 
 const command: Command = {
     payload: new SlashCommandBuilder()

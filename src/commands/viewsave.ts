@@ -1,6 +1,6 @@
 import { AttachmentBuilder, SlashCommandBuilder } from "discord.js"
-import { Command, SaveOrSaveStruct } from "./utilities/types"
-import saveCollection from "./utilities/saves"
+import { Command, SaveOrSaveStruct } from "../base/types"
+import saveCollection from "../base/saves"
 
 const command: Command = {
     payload: new SlashCommandBuilder()
@@ -22,7 +22,7 @@ const command: Command = {
 
         const save = saveCollection.getSaveByID(codeID)
         if (!save) {
-            return interaction.reply(`Can't find a save with id ${codeID}`)
+            return interaction.reply(`Can't find a save with id \`${codeID}\`.`)
         }
 
         let target: SaveOrSaveStruct
@@ -72,11 +72,7 @@ const command: Command = {
         if (target.history) {
             for (let i = 0; i < target.history.length; i++) {
                 const save = target.history[i]
-                output.push(
-                    Array(2)
-                        .fill("`")
-                        .join(`${i + 1}: ${save.path.name}`)
-                )
+                output.push(`\`${i + 1}: ${save.path.name}\``)
             }
         }
 
@@ -88,7 +84,7 @@ const command: Command = {
                 ? "History:\n" + output.join("\n") // there are some history saves
                 : historyIndex != null
                   ? `History index ${historyIndex}.` // we are currently in a history save
-                  : "") // neither of the above
+                  : "This save has no history.") // neither of the above
 
         interaction.reply({ content, files })
     },

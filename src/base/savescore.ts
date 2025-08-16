@@ -1,6 +1,3 @@
-// systematical globals
-import { finished, Readable } from "stream"
-
 // packages
 import { Attachment, ChatInputCommandInteraction } from "discord.js"
 import { Path } from "pathobj/tspath"
@@ -9,6 +6,7 @@ import { Path } from "pathobj/tspath"
 import { SaveCode } from "./code"
 import { Data, Save, SaveStructure } from "./types"
 import saveCollection from "./saves"
+import { downloadFile } from "./utils"
 
 const home = Path.home()
 const arrasSaves = new Path(
@@ -25,16 +23,6 @@ let savePath: Path
 
 // why does the constructor default to time now
 const now = new Date()
-
-async function downloadFile(url: string, fp: Path) {
-    const res = await fetch(url)
-    if (!res.body) throw new Error("Body missing.")
-    const fileStream = fp.createWriteStream({ flags: "wx" })
-    // FIXME: Incompatible types
-    finished(Readable.fromWeb(res.body).pipe(fileStream), (err) => {
-        if (err) throw err
-    })
-}
 
 async function addScreenshots(
     windowed: Attachment | null,
@@ -100,33 +88,30 @@ windowed screenshot: ${windowed}
 fullscreen screenshot: ${fullscreen}
 
 Settings:
-> confirmation: ${data.confirmation}
-> pic_export: ${data.pic_export}
-> screenshot directory: ${data.ss_dir}
+\\> confirmation: ${data.confirmation}
+\\> pic_export: ${data.pic_export}
+\\> screenshot directory: ${data.ss_dir}
 
 Data:
-> code: ${code.innerCode}
-> gamemode: ${code.dirSortedMode}
-> mode: ${code.mode}
-> region ${code.server.region}
-> score: ${code.formattedScore}
-> runtime in hours: ${(code.runtimeSeconds / 3600).toFixed(2)}
-> runtime in minutes: ${(code.runtimeSeconds / 60).toFixed(2)}`
+\\> code: ${code}
+\\> gamemode: ${code.dirSortedMode}
+\\> mode: ${code.mode}
+\\> region ${code.server.region}
+\\> score: ${code.formattedScore}
+\\> runtime in hours: ${(code.runtimeSeconds / 3600).toFixed(2)}h
+\\> runtime in minutes: ${(code.runtimeSeconds / 60).toFixed(2)}min`
 
     logdata.write(contents + "\n" + text)
     return text
 }
 
 export function test(): boolean {
-    if (
-        !settings.exists() ||
-        !logdata.exists() ||
-        !dirData.exists() ||
-        !arrasSaves.exists()
+    return (
+        settings.exists() 
+        && logdata.exists() 
+        && dirData.exists() 
+        && arrasSaves.exists()
     )
-        return false
-
-    return true
 }
 
 export async function main(

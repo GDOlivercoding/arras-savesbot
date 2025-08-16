@@ -1,7 +1,7 @@
-import { SaveCode } from "./utilities/code"
+import { SaveCode } from "../base/code"
 import { SlashCommandBuilder } from "discord.js"
-import { Command } from "./utilities/types"
-import unixFormat from "./utilities/unixformat"
+import { Command } from "../base/types"
+import { unixFormat } from "../base/utils"
 
 const command: Command = {
     payload: new SlashCommandBuilder()

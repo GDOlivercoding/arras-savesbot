@@ -1,3 +1,6 @@
+import { Path } from "pathobj/tspath";
+import { finished, Readable } from "stream";
+
 export const unixFormat = {
     /** 01:46 */
     HHMM: "t",
@@ -42,3 +45,13 @@ const handler: ProxyHandler<Formatted> = {
 }
 
 export const distyperef = new Proxy({} as Formatted, handler)
+
+export async function downloadFile(url: string, savePath: Path) {
+    const res = await fetch(url)
+    if (!res.body) throw new Error("Body missing.")
+    const fileStream = savePath.createWriteStream({ flags: "wx" })
+    // FIXME: Incompatible types
+    finished(Readable.fromWeb(res.body).pipe(fileStream), (err) => {
+        if (err) throw err
+    })
+}

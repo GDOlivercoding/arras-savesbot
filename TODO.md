@@ -1,6 +1,7 @@
 # TODO
 
-## Implement dates for number comparisons (<=[2025y 6mon])
+## ~~Implement dates for number comparisons (<=[2025y 6mon])~~
+## Implement a readable way for users to enter a date as a string (creationTime code part option)
 
 Keys: y (year), mon (month), d (day), h (hour), min (minute), s (second) and ms (milisecond)
 
@@ -12,30 +13,28 @@ Replace them if user specifies said keys
 
 Then convert to a unix timestamp and compile as a number expression
 
-## [Integrate ended runs](C:\Users\Uzivatel\Desktop\Langs\js+ts\node.js\discord.js\savesbot\src\commands\utilities\saves.ts)
+## Integrate ended runs
 
 In saves.ts, integrate ended runs in such a way where code matching is either disabled, or only enabled for non ended runs
 
-## Improve embed pager to work
+## Improve embed pager to work and add pagination
 
 currently embedpager.ts' embedSlice() function does not work properly
 
 ## Finish implement code matching
 
 Filters like mode and server and not done properly or at all.
+currently mode and build have be severely improved.
+
+code parts TODO: ID, server, (numOPs *may* be improvable), creationTime (refer to the first header) and safetyToken if theres something to do with it 
+
+## Server code part doesn't work
+
+TODO: server matching actually doesn't work at all for some reason
 
 ## Tighten code match types
 
 tighten `CodePartFunc` and `CodePartPair` types in types.d.ts
-
-## ~~Anchoring build matching to the end with $~~
-
-self explanatory, as in regex: /expr$/, done just needs testing, done
-https://discord.com/channels/1395076754816761956/1402656124452212799/1403029718667628574
-
-## ~~Test code matching for `build`~~
-
-Finished, it works
 
 ## Debug tspath's SingleArgType
 
@@ -45,7 +44,16 @@ because it doesnt work for some reason
 
 because `ReadableStream<Uint8Array>` is not compatible with `ReadableStream<any>`
 
-## package.json: @types/node is a dev dependency and make prettier a dev dependency
+## ~~package.json: @types/node is a dev dependency and make prettier a dev dependency~~
+
+## ~~Anchoring build matching to the end with $~~
+
+self explanatory, as in regex: /expr$/, done just needs testing, done
+https://discord.com/channels/1395076754816761956/1402656124452212799/1403029718667628574
+
+## ~~Test code matching for `build`~~
+
+Finished, it works
 
 ## ~~Connect to github and push all changes~~
 
