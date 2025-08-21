@@ -7,7 +7,7 @@
     "type": "module",
     "main": "src/index.ts",
     "scripts": {
-        "test": "tsx ./src/commands/utilities/path.test.ts && tsx ./src/commands/utilities/saves.test.ts"
+        "test": "tsx ./src/runtest.ts"
     },
     "dependencies": {
         "arras-parser": "file:../../arras-parser",
@@ -17,7 +17,7 @@
     },
     "devDependencies": {
         "@eslint/js": "^9.32.0",
-        "@types/node": "^24.0.3",
+        "@types/node": "^24.3.0",
         "eslint": "^9.32.0",
         "globals": "^16.3.0",
         "jiti": "^2.5.1",

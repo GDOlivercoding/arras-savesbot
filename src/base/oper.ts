@@ -1,6 +1,6 @@
 import { ChatInputCommandInteraction } from "discord.js"
-import { AttrnameToCompiler, CodePartPair, NumOpFunc, OperFunc } from "./types"
-import { ShortKey, indexToKey, keyToAttrname } from "./saves"
+import { AttrnameToCompiler, CodePartFunc, CodePartPairs, NumOpFunc, OperFunc } from "./types"
+import { ShortKey, indexToKey, keyToAttrname } from "./structs"
 import { parse } from "arras-parser"
 import { distyperef } from "./utils"
 
@@ -58,7 +58,7 @@ export class InteractionCompiler {
         return func
     }
 
-    compileCodeMatch(expr: string | null): false | CodePartPair[] | undefined {
+    compileCodeMatch(expr: string | null): false | CodePartPairs | undefined {
         if (expr == null) return
         try {
             return parseGenericCodeMatch(expr)
@@ -71,7 +71,7 @@ export class InteractionCompiler {
     }
 }
 
-export function parseGenericCodeMatch(expr: string): CodePartPair[] {
+export function parseGenericCodeMatch(expr: string): CodePartPairs {
     expr = expr.replaceAll(" ", "")
     if (!expr) return []
 
@@ -85,7 +85,7 @@ export function parseGenericCodeMatch(expr: string): CodePartPair[] {
         return Error(`Key '${key}' of pair '${pair}' ${message}`)
     }
 
-    const results: CodePartPair[] = []
+    const results: CodePartPairs = []
     for (const pair of exprArr) {
         const res = re_matchSingleSlot.exec(pair)
         if (!res || !res.groups) throw new Error(`Failed to match '${pair}' as a pair.`)
@@ -121,10 +121,10 @@ export function parseGenericCodeMatch(expr: string): CodePartPair[] {
         }
 
         const targetKey = key as ShortKey
-        const targetAttr = keyToAttrname[targetKey]
+        const attrname = keyToAttrname[targetKey]
         /** We pick the compiler and compile it with the value. */
-        const func = attrnameToCompiler[targetAttr](value)
-        results.push([targetAttr, func])
+        const predicate = attrnameToCompiler[attrname](value) as CodePartFunc
+        results.push({ key: attrname, predicate })
     }
 
     return results
@@ -185,8 +185,6 @@ export const attrnameToCompiler: AttrnameToCompiler = {
     ID: (userVal) => (id) => userVal == id,
     server: (userVal) => (server) => userVal == server.id, // TODO possibly modify
     mode: (userVal) => {
-        // Whether to match if target has all attributes
-        // or if target has only these attributes
         let strictMode = false
         if (userVal.startsWith("!")) {
             strictMode = true
@@ -195,7 +193,7 @@ export const attrnameToCompiler: AttrnameToCompiler = {
 
         const userMode = parse(userVal)
         return (mode) => userMode.compare(mode, strictMode)
-    }, // TODO
+    }, 
     tankClass: (userVal) => {
         const transform = (s: string) => s.toLowerCase().replace(/[ -]/g, "")
 

@@ -22,8 +22,9 @@ const command: Command = {
                 .setDescription("screenshot_2")
                 .setRequired(false)
         )
-        .addBooleanOption((o) =>
-            o.setName("restore").setDescription("restore")
+        .addBooleanOption((o) => o
+            .setName("restore")
+            .setDescription("restore")
         ),
     async execute(interaction) {
         if (interaction.user.id != process.env.OWNER_ID) {
@@ -40,22 +41,20 @@ const command: Command = {
         let fullscreen: Attachment
 
         if (ss1.size >= ss2.size) {
-            ;[windowed, fullscreen] = [ss1, ss2]
+            [windowed, fullscreen] = [ss1, ss2]
         } else {
-            ;[windowed, fullscreen] = [ss2, ss1]
+            [windowed, fullscreen] = [ss2, ss1]
         }
 
-        const waitUntilReplied = interaction.reply(`Saving ${code} ...`)
+        await interaction.reply(`Saving ${code} ...`)
 
         try {
             const text = await savescore(
-                interaction,
                 code,
                 windowed,
                 fullscreen,
-                restore == null ? true : restore
+                restore ?? true
             )
-            await waitUntilReplied
             interaction.editReply("Saved score successfully.\n" + text.written)
         } catch (error) {
             const replyFuncChoice = interaction.replied

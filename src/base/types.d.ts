@@ -1,6 +1,7 @@
 import { ChatInputCommandInteraction, SlashCommandOptionsOnlyBuilder } from "discord.js"
 import { SaveCode } from "./code"
 import { Path } from "pathobj/tspath"
+import { ShortKey } from "./structs"
 
 // commands
 
@@ -60,7 +61,7 @@ export type SaveQueryOptions = PartialNullable<{
     dirSortedMode: DirSortedMode
     history: NumOpFunc
     region: Region
-    codeParts: CodePartPair[]
+    codeParts: CodePartMap
 }>
 
 // operator syntax
@@ -91,22 +92,32 @@ export type PickedCodeKeys =
     | "safetyToken"
 
 export type AttrnameToCompiler = {
-    [K in keyof Pick<SaveCode, PickedCodeKeys>]: (
+    [K in PickedCodeKeys]: (
         userVal: string
     ) => (statVal: SaveCode[K]) => boolean
 }
 
+export type KeyToAttrname = {
+    [K in ShortKey]: PickedCodeKeys
+}
+
 // TODO tighten these types later.
-export type CodePartFunc = (
-    statVal: string | number | Server | Gamemode | Build | Date
-) => boolean
-export type CodePartPair = [PickedCodeKeys, CodePartFunc]
+export type CodePartPair = {
+    key: PickedCodeKeys,
+    predicate: CodePartFunc
+}
+
+type CodePartFunc = (statVal: unknown) => boolean
+
+export type CodePartPairs = CodePartPair[]
 
 type DateSuffixes = "y" | "mon" | "d" | "h" | "min" | "s" | "ms"
 
 type DateOperationMap = Partial<{
     [K in DateSuffixes]: number
 }>
+
+type State = {state: "ok" | "err", message: string}
 
 // /.../settings.json structure
 export type Data = {

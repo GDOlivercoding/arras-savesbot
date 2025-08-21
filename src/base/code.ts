@@ -1,7 +1,8 @@
 import { parse } from "arras-parser"
 import { Gamemode } from "arras-parser/types"
 import { Path } from "pathobj/tspath"
-import { DirSortedMode, Region, RegionChar } from "./types"
+import { DirSortedMode, Region, RegionChar, State } from "./types"
+import { indexToKey, keyToAttrname } from "./structs"
 
 // (6e2121d4:#ef:w33oldscdreadnoughts2:Auto-Tri-Angle:8/8/9/9/9/9/9/7/1/0:10083590:2720:9:3:0:536:9:1728507182:5lZqbl5uVQDOddyJ)
 
@@ -119,10 +120,8 @@ export class SaveCode {
      * @param code The code string.
      * @returns Whether the code is valid or not.
      */
-    static validate(code: string): { state: "ok" | "err"; message: string } {
-        const err: (msg: string) => { state: "err"; message: string } = (
-            message: string
-        ) => {
+    static validate(code: string): State {
+        function err(message: string): State {
             return { state: "err", message }
         }
 
@@ -136,7 +135,7 @@ export class SaveCode {
 
         //console.log(codeParts);
 
-        function regexCheck(): ReturnType<typeof SaveCode.validate> {
+        function regexCheck(): State {
             const codeID = /([\d|a-z]+)/
             const server = /(#[e|w|c|a|o][a-z])/
             const mode = /([\d|a-z]+)/ // Mode is going to get validated later; too hard for regex
@@ -146,7 +145,7 @@ export class SaveCode {
             const digitOnly: RegExp[] = Array(10).fill(/(\d+)/)
 
             const [
-                score, // score must be `750K <= score <= 2 ** 32 - 1`
+                score, // score must be `750K <= score <= 2 ** (32 - 1)`
                 runtime, // runtime in seconds
                 kills,
                 assists,
@@ -182,13 +181,12 @@ export class SaveCode {
 
                 // XXX The latter check is VERY important!!!
                 if (!res || res[0] != part) {
-                    return err(
-                        `Regex ${re} failed to match ${part}${res ? `, output: ${res[0]}` : ""}`
-                    )
+                    const name = keyToAttrname[indexToKey[index]]
+                    return err(`Failed to validate part '${name}'.`)
                 }
             }
 
-            return { state: "ok", message: "Passed all checks" }
+            return { state: "ok", message: "Passed all regex checks" }
         }
 
         const reRes = regexCheck()
@@ -196,10 +194,13 @@ export class SaveCode {
             return reRes
         }
 
+        const mode = codeParts[2]
         try {
-            parse(codeParts[2]) // mode
-        } catch {
-            return err(`Failed parsing mode ${codeParts[2]}`)
+            parse(mode) // mode
+        } catch (error) {
+            let normalized = `${error}`.replace(/(?<!\.|!|\?)/, ".")
+            normalized = normalized[0].toUpperCase() + normalized.slice(1)
+            return err(`Failed parsing mode '${mode}': ${normalized}`)
         }
 
         return { state: "ok", message: "Passed all validation checks" }

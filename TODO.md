@@ -28,21 +28,40 @@ currently mode and build have be severely improved.
 
 code parts TODO: ID, server, (numOPs *may* be improvable), creationTime (refer to the first header) and safetyToken if theres something to do with it 
 
-## Server code part doesn't work
-
-TODO: server matching actually doesn't work at all for some reason
-
 ## Tighten code match types
 
 tighten `CodePartFunc` and `CodePartPair` types in types.d.ts
 
-## Debug tspath's SingleArgType
+## Rewrite savescore.ts to use saves.ts
+
+---
+
+## TODO ./src/base/saves.ts:SaveCollection.register():239:4
+
+# DONE
+
+## ~~Server code part doesn't work~~
+
+TODO: server matching actually doesn't work at all for some reason
+
+[done](https://discord.com/channels/1395076754816761956/1401911748679831622/1406290365463662710)
+
+## ~~Debug tspath's SingleArgType~~
 
 because it doesnt work for some reason
 
-## Fix C:\Users\Uzivatel\Desktop\Langs\js+ts\node.js\discord.js\savesbot\src\commands\utilities\savescore.ts:34:31
+```ts
+type Func = (options?: {name: string, target: string}) => void
+
+const wrong: Parameters<Func> extends [infer E] ? E : never // never
+const correct: Parameters<Func> extends (infer E)[] ? E : never // {name: string, target: string}
+```
+
+## ~~Fix C:\Users\Uzivatel\Desktop\Langs\js+ts\node.js\discord.js\savesbot\src\commands\utilities\savescore.ts:34:31~~
 
 because `ReadableStream<Uint8Array>` is not compatible with `ReadableStream<any>`
+
+[solution](https://discord.com/channels/508357248330760243/1405872191689592882)
 
 ## ~~package.json: @types/node is a dev dependency and make prettier a dev dependency~~
 
@@ -53,8 +72,4 @@ https://discord.com/channels/1395076754816761956/1402656124452212799/14030297186
 
 ## ~~Test code matching for `build`~~
 
-Finished, it works
-
 ## ~~Connect to github and push all changes~~
-
-done

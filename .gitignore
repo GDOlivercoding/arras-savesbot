@@ -1,7 +1,6 @@
 **/_*
 **/*.test.*
 *.png
-docs
 
 # Logs
 logs

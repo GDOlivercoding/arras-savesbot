@@ -1,5 +1,5 @@
 // packages
-import { Attachment, ChatInputCommandInteraction } from "discord.js"
+import { Attachment } from "discord.js"
 import { Path } from "pathobj/tspath"
 
 // local
@@ -41,13 +41,12 @@ async function addScreenshots(
     return [windName, fullName]
 }
 
-function resolveRestore(
-    interaction: ChatInputCommandInteraction
-): SaveStructure[] {
+function resolveRestore(): SaveStructure[] {
+    // return a list of the new save history
+
     // ffs with these types man
     const send = (...items: { toString(): string }[]) => {
         console.info(...items)
-        interaction.editReply(items.map((i) => i.toString()).join(" "))
     }
 
     const targetRestore = saveCollection.savesArr.find((save) => {
@@ -63,8 +62,7 @@ function resolveRestore(
 
     const target = targetRestore.path
 
-    targetRestore.history.forEach((save) => {
-        const dir = save.path
+    targetRestore.history.map(save => save.path).forEach((dir) => {
         dir.rename(savePath.join(dir.name))
     })
 
@@ -115,21 +113,22 @@ export function test(): boolean {
 }
 
 export async function main(
-    interaction: ChatInputCommandInteraction,
     strcode: string,
     windowedBuffer: Attachment | null,
     fullscreenBuffer: Attachment | null,
     restore: boolean
 ): Promise<Save & { written: string }> {
     if (!settings.exists()) {
-        const err = new Error("Settings file doesn't exist!")
-        interaction.reply(`${err}`)
-        throw err
+        throw Error("Settings file doesn't exist!")
     }
 
-    // WHY THE FUCK DO TRY CATCH BLOCKS HAVE THEIR OWN SCOPE
     data = JSON.parse(settings.readText())
 
+    const res = SaveCode.validate(strcode);
+    if (res.state == "err") {
+        throw Error(`Invalid Code: ${res.message}`)
+    }
+    
     code = new SaveCode(strcode)
 
     const dirname = code.constructDirname().name
@@ -147,7 +146,7 @@ export async function main(
 
     let history: SaveStructure[] = []
     if (restore) {
-        history = resolveRestore(interaction)
+        history = resolveRestore()
     }
 
     data.unclaimed[code.innerCode] = now.toISOString()

@@ -13,5 +13,5 @@ export default defineConfig([
             "no-explicit-any": "off"
         }
     },
-    tseslint.configs.recommended
+    ...tseslint.configs.recommended
 ])

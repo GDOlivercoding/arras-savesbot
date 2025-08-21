@@ -16,11 +16,12 @@ import {
     SaveQueryOptions
 } from "../base/types"
 
-import saveCollection, {
+import {
     modes,
     //modeToDescription,
     regions
-} from "../base/saves"
+} from "../base/structs"
+import saveCollection from "../base/saves"
 
 import sliceEmbeds from "../base/embedpager"
 import { InteractionCompiler } from "../base/oper"
@@ -76,16 +77,13 @@ const command: Command = {
                     "Match any part of the code. do /find-help for help."
                 )
         ),
-    /** This is a wrapper of {@link saveCollection.querySaves}. */
     async execute(interaction) {
         const compiler = new InteractionCompiler(interaction)
         const options = interaction.options
 
         const includeEnded = false // options.getBoolean("include-ended-runs")
         const screenshotExpr = options.getString("screenshot-count")
-        const dirSortedMode = options.getString("sub-mode") as
-            | DirSortedMode
-            | undefined
+        const dirSortedMode = options.getString("sub-mode") as DirSortedMode | undefined
         const historyExpr = options.getString("history-count")
         const region = options.getString("region") as Region | undefined
         const codeMatchExpr = options.getString("match-code")
@@ -107,7 +105,7 @@ const command: Command = {
             codeParts
         }
 
-        console.log(searchOptions)
+        //console.log(searchOptions)
 
         const results = saveCollection.querySaves(searchOptions, includeEnded)
 
