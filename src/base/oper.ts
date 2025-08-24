@@ -3,6 +3,8 @@ import { AttrnameToCompiler, CodePartFunc, CodePartPairs, NumOpFunc, OperFunc } 
 import { ShortKey, indexToKey, keyToAttrname } from "./structs"
 import { parse } from "arras-parser"
 import { distyperef } from "./utils"
+import { Build } from "./code"
+import { singleDateCellToUnix } from "./date"
 
 const opToFunc: {
     [key: string]: OperFunc
@@ -32,6 +34,8 @@ const re_matchNumOP = /^(?<oper>[><]=?)\D*(?<value>\d+)$/
 const re_matchAround = /^<(?<range>\d+)>(?<value>\d+)$/
 const re_matchRange = /^<(?<min>\d+)\D*-\D*(?<max>\d+)>$/
 const re_matchSingleSlot = /^(?<key>[a-z]+|\d+);(?<value>.+)$/
+const re_matchInner = /\[[^\]]+\]/g
+const re_matchSpecialCaseAround = /^<(?<tolerance>\[[^\]]+\])>(?<value>\[[^\]]+\])$/
 
 export class InteractionCompiler {
     interaction: ChatInputCommandInteraction
@@ -130,6 +134,11 @@ export function parseGenericCodeMatch(expr: string): CodePartPairs {
     return results
 }
 
+/**
+ * Parse a {@link distyperef.DateOperation} (Integer Operation).
+ * @param expr The expression.
+ * @returns Returns the parsed function or null as failure.
+ */
 export function parseIntOper(expr: string): NumOpFunc | null {
     expr = expr.replace(/[ |,|.]/g, "")
 
@@ -161,8 +170,33 @@ export function parseIntOper(expr: string): NumOpFunc | null {
         return (statVal) => rangeFunc(statVal, min, max)
     }
 
-    // Failed to match.
+    // Failed to match. 
     return null
+}
+
+/**
+ * Parse a {@link distyperef.DateOperation}.
+ * @param expr expression.
+ * @returns null: failure otherwise success.
+ * @throws {Error} with message if some values are incorrect.
+ */
+export function parseDateOper(expr: string): NumOpFunc | null {
+    const rangeRes = re_matchSpecialCaseAround.exec(expr);
+
+    // Special casing because `tolerance` can't default to a year
+    // that would be silly and pointless.
+    if (rangeRes?.groups) {
+        const tolerance = rangeRes.groups.tolerance;
+        const value = rangeRes.groups.value;
+
+        const toleranceUnix = singleDateCellToUnix(tolerance)
+        const valueUnix = singleDateCellToUnix(value, true)
+
+        return (statVal) => aroundFunc(statVal, valueUnix, toleranceUnix)
+    }
+
+    // XXX how im i supposed to avoid the global flag trap?
+    return parseIntOper(expr.replaceAll(re_matchInner, expr => String(singleDateCellToUnix(expr, true))))
 }
 
 /**
@@ -178,6 +212,38 @@ function createIntOperFunc(name: string) {
                 `'${name}' code part value '${userVal}' is not parseable as type ${distyperef.NumberOperation}.`
             )
         return expr
+    }
+}
+
+function createDateOperFunc(name: string) {
+    return (userVal: string) => {
+        const numOpRes = parseIntOper(userVal)
+        if (numOpRes) {
+            return wrapDateOrIntOperFunc(numOpRes)
+        }
+
+        // This part is clear.
+        const res = parseDateOper(userVal)
+        if (!res) {
+            throw Error(
+                `'${name}' code part value '${userVal}' is not parseable as type ${distyperef.DateOperation}`
+                + `or ${distyperef.NumberOperation}.`
+            )
+        }
+        return wrapDateOrIntOperFunc(res)
+    }
+}
+
+/**
+ * Safely wraps around a Number operation function that might receive a date,
+ * and converts that date to a unix timestamp.
+ * @param func 
+ * @returns the wrapped function
+ */
+function wrapDateOrIntOperFunc(func: NumOpFunc) {
+    return (statVal: Date | number) => {
+        if (typeof statVal == "number") return func(statVal);
+        return func(Math.floor(statVal.getTime() / 1000))
     }
 }
 
@@ -208,12 +274,13 @@ export const attrnameToCompiler: AttrnameToCompiler = {
             endAnchor = true
         }
 
-        const parts = userVal.split("/")
+        const userBuild = new Build(userVal);
+        const parts = userBuild.parts
 
         const parsedParts = parts.map((part) => {
             // empty part means match any, like js comments.
             if (!part) return () => true
-            const result = parseIntOper(part)
+            const result = parseIntOper(`${part}`)
             if (!result) {
                 throw Error(`'${result}' is an invalid ${distyperef.NumberOperation}.`)
             }
@@ -223,7 +290,6 @@ export const attrnameToCompiler: AttrnameToCompiler = {
         // Doing it this way because i want to do as much in the
         // compilation rather than execution.
         if (!endAnchor) {
-            console.log("Picked start anchor.")
             return (build) => {
                 const buildParts = build.parts
                 for (let i = 0; i < parsedParts.length; i++) {
@@ -234,7 +300,6 @@ export const attrnameToCompiler: AttrnameToCompiler = {
                 return true
             }
         } else {
-            console.log("Picked end anchor")
             return (build) => {
                 const buildParts = build.parts
                 // here, `i` the amount of steps away from the end of the array.
@@ -249,25 +314,12 @@ export const attrnameToCompiler: AttrnameToCompiler = {
         }
     },
     rawScore: createIntOperFunc("score"),
-    runtimeSeconds: createIntOperFunc("runtime"),
+    runtimeSeconds: createDateOperFunc("runtime"),
     kills: createIntOperFunc("kills"),
     assists: createIntOperFunc("assists"),
     bossKills: createIntOperFunc("bosses"),
     polygonsDestroyed: createIntOperFunc("polygons"),
     customKills: createIntOperFunc("custom"),
-    creationTime: (userVal) => {
-        // here we either accept a unix timestamp as a number operation
-        // or a date then convertible to a number operation (<[2024y 7m 5d])
-        if (!isNaN(parseInt(userVal))) {
-            // i want this part executed immediately.
-            const wrapped = createIntOperFunc("creation")(userVal)
-            return (statValDate) =>
-                wrapped(Math.floor(statValDate.getTime() / 1000))
-        }
-
-        throw Error("Date comparisons aren't yet implemented.")
-        // here compile the pattern and return back to number operations
-        //return (creationTime) => true
-    },
+    creationTime: createDateOperFunc("creation"),
     safetyToken: (userVal) => (safetyToken) => userVal == safetyToken
 } as const

@@ -34,7 +34,7 @@ type Formatted = {
 const handler: ProxyHandler<Formatted> = {
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     get(_target, prop, _receiver) {
-        if (typeof prop == "symbol") throw Error(`Internal: Special proxy indexed by symbol '${String(prop)}'`);
+        if (typeof prop == "symbol") throw Error(`Internal: Link proxy indexed by symbol '${String(prop)}'`);
         if (!(prop in nameToLink)) throw Error(`Internal: Invalid link key '${prop}'.`)
         const cast = prop as keyof Formatted
         //if (nameToLink[cast] == "MISSING") throw Error(`Internal: Key '${prop}' has not been implemented.`)

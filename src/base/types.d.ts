@@ -13,22 +13,22 @@ interface Command {
 
 // saves and structures
 
-type PartialNullable<T> = {
-    [P in keyof T]?: T[P] | null
-}
+type PartialNullable<T> = Partial<{
+    [P in keyof T]: T[P] | null
+}>
 
-export type DirSortedMode =
+type DirSortedMode =
     | "Normal"
     | "Growth"
     | "Arms Race"
     | "Olddreads"
     | "Newdreads"
 
-export type Region = "Europe" | "US West" | "US Central" | "Oceania" | "Asia"
-export type RegionChar = "e" | "w" | "c" | "o" | "a"
+type Region = "Europe" | "US West" | "US Central" | "Oceania" | "Asia"
+type RegionChar = "e" | "w" | "c" | "o" | "a"
 
 /** Bare structure of save, usually present as a history save */
-export interface SaveStructure {
+interface SaveStructure {
     /** Parsed and validated code of `path.join("code.txt")` file. */
     code: SaveCode
     /** Path pointing to the directory this save belongs to. */
@@ -40,42 +40,42 @@ export interface SaveStructure {
 }
 
 /** Top level save, the current version of save history. */
-export interface Save extends SaveStructure {
+interface Save extends SaveStructure {
     history: SaveStructure[]
 }
 
 /** Save or Save history */
-export interface SaveOrSaveStruct extends SaveStructure {
+interface SaveOrSaveStruct extends SaveStructure {
     history?: SaveStructure[]
 }
 
 /** a Top level save of an ended run */
-export interface SaveEndedRun extends Save {
+interface SaveEndedRun extends Save {
     code: undefined
 }
 
-export type AnySave = Save | SaveEndedRun
+type AnySave = Save | SaveEndedRun
 
-export type SaveQueryOptions = PartialNullable<{
+type SaveQueryOptions = PartialNullable<{
     screenshots: NumOpFunc
     dirSortedMode: DirSortedMode
     history: NumOpFunc
     region: Region
-    codeParts: CodePartMap
+    codeParts: CodePartPairs
 }>
 
 // operator syntax
 
-export type OperFunc = (statVal: number, userVal: number) => boolean
-export type NumOpFunc = (statVal: number) => boolean
+type OperFunc = (statVal: number, userVal: number) => boolean
+type NumOpFunc = (statVal: number) => boolean
 
 // map for find.ts
 
-export type ModeToDescription = {
+type ModeToDescription = {
     [K in DirSortedMode]: string
 }
 
-export type PickedCodeKeys =
+type PickedCodeKeys =
     | "ID"
     | "server"
     | "mode"
@@ -91,25 +91,25 @@ export type PickedCodeKeys =
     | "creationTime"
     | "safetyToken"
 
-export type AttrnameToCompiler = {
+type AttrnameToCompiler = {
     [K in PickedCodeKeys]: (
         userVal: string
     ) => (statVal: SaveCode[K]) => boolean
 }
 
-export type KeyToAttrname = {
+type KeyToAttrname = {
     [K in ShortKey]: PickedCodeKeys
 }
 
 // TODO tighten these types later.
-export type CodePartPair = {
+type CodePartPair = {
     key: PickedCodeKeys,
     predicate: CodePartFunc
 }
 
 type CodePartFunc = (statVal: unknown) => boolean
 
-export type CodePartPairs = CodePartPair[]
+type CodePartPairs = CodePartPair[]
 
 type DateSuffixes = "y" | "mon" | "d" | "h" | "min" | "s" | "ms"
 
@@ -120,11 +120,11 @@ type DateOperationMap = Partial<{
 type State = {state: "ok" | "err", message: string}
 
 // /.../settings.json structure
-export type Data = {
+type Data = {
     fullscreen_ss: string
     windowed_ss: string
     single_ss: string
-    pic_export: 0 | 1 | 2
+    pic_: 0 | 1 | 2
     confirmation: boolean
     ss_dir: string // Maybe path conversion
     open_dirname: boolean
