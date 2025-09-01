@@ -13,6 +13,8 @@ Replace them if user specifies said keys
 
 Then convert to a unix timestamp and compile as a number expression
 
+\*in progress\* NOTE: runtime defaults to current year, make it not do that
+
 ## Integrate ended runs
 
 In saves.ts, integrate ended runs in such a way where code matching is either disabled, or only enabled for non ended runs
@@ -37,6 +39,12 @@ tighten `CodePartFunc` and `CodePartPair` types in types.d.ts
 ---
 
 ## TODO ./src/base/saves.ts:SaveCollection.register():239:4
+
+## Make eslint ignore *.test.* files.
+
+## C:\Users\Uzivatel\Desktop\Langs\js+ts\node.js\arras-parser\parse.ts
+
+Make better error messages.
 
 # DONE
 

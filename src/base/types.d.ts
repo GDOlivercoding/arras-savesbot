@@ -57,17 +57,20 @@ interface SaveEndedRun extends Save {
 type AnySave = Save | SaveEndedRun
 
 type SaveQueryOptions = PartialNullable<{
-    screenshots: NumOpFunc
+    screenshots: EvaluatorFunc
     dirSortedMode: DirSortedMode
-    history: NumOpFunc
+    history: EvaluatorFunc
     region: Region
     codeParts: CodePartPairs
 }>
 
 // operator syntax
 
-type OperFunc = (statVal: number, userVal: number) => boolean
+type EvaluatorFunc<V> = (statVal: V) => boolean
+type CompilerFunc<R> = (userVal: string) => R
+
 type NumOpFunc = (statVal: number) => boolean
+type OperFunc = (statVal: number, userVal: number) => boolean
 
 // map for find.ts
 
@@ -89,12 +92,10 @@ type PickedCodeKeys =
     | "polygonsDestroyed"
     | "customKills"
     | "creationTime"
-    | "safetyToken"
+    | "safetyToken";
 
 type AttrnameToCompiler = {
-    [K in PickedCodeKeys]: (
-        userVal: string
-    ) => (statVal: SaveCode[K]) => boolean
+    [K in PickedCodeKeys]: CompilerFunc<EvaluatorFunc<SaveCode[K]>>
 }
 
 type KeyToAttrname = {
@@ -124,14 +125,14 @@ type Data = {
     fullscreen_ss: string
     windowed_ss: string
     single_ss: string
-    pic_: 0 | 1 | 2
+    pic_export: 0 | 1 | 2
     confirmation: boolean
     ss_dir: string // Maybe path conversion
     open_dirname: boolean
     /**
      * code: iso format
      */
-    unclaimed: { [code: string]: string }
+    unclaimed: Record<string, string>
     /**
      * path
      */

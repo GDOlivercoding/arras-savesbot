@@ -1,8 +1,8 @@
 import { parse } from "arras-parser"
 import { Gamemode } from "arras-parser/types"
-import { Path } from "pathobj/tspath"
 import { DirSortedMode, Region, RegionChar, State } from "./types"
-import { indexToKey, keyToAttrname } from "./structs"
+import { indexToKey } from "./structs"
+import { UnixFormat } from "./utils"
 
 // (6e2121d4:#ef:w33oldscdreadnoughts2:Auto-Tri-Angle:8/8/9/9/9/9/9/7/1/0:10083590:2720:9:3:0:536:9:1728507182:5lZqbl5uVQDOddyJ)
 
@@ -32,13 +32,13 @@ export class SaveCode {
     formattedScore: string
 
     /**
-     * Construct a new Arras.io `SaveCode` object from a code
-     * @param {string} code The string code
+     * Construct a new Arras.io `SaveCode` object from a code string
+     * @param code The string code, a string with 14 parts seperated
+     * by colons, surrounded by parens and optionally backticks.
      */
     constructor(code: string) {
         this.innerCode = code.replace(/^`?\(/, "").replace(/\)`?$/, "")
-        const parts = this.innerCode.split(":")
-        this.parts = parts
+        this.parts = this.innerCode.split(":")
 
         const [
             codeID,
@@ -55,7 +55,7 @@ export class SaveCode {
             customKills,
             creationTime,
             safetyToken
-        ] = parts
+        ] = this.parts
 
         this.ID = codeID
         this.server = new Server(serverId)
@@ -92,18 +92,14 @@ export class SaveCode {
     constructDirname() {
         const now = new Date()
 
-        return new Path(
-            import.meta.dirname,
-            this.dirSortedMode,
-            [
-                now.toISOString().split("T")[0],
-                this.formattedScore,
-                this.tankClass
-            ].join(" ")
-        )
+        return [
+            now.toISOString().split("T")[0],
+            this.formattedScore,
+            this.tankClass
+        ].join(" ")
     }
 
-    creationTimestamp(format: string) {
+    creationTimestamp(format: UnixFormat) {
         return `<t:${Math.floor(this.creationTime.getTime() / 1000)}:${format}>`
     }
 
@@ -181,7 +177,7 @@ export class SaveCode {
 
                 // XXX The latter check is VERY important!!!
                 if (!res || res[0] != part) {
-                    const name = keyToAttrname[indexToKey[index]]
+                    const name = indexToKey[index]
                     return err(`Failed to validate part '${name}'.`)
                 }
             }

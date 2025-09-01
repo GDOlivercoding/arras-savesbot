@@ -18,6 +18,8 @@ export const unixFormat = {
     relative: "R"
 } as const
 
+export type UnixFormat = typeof unixFormat[keyof typeof unixFormat]
+
 const nameToLink = {
     NumberOperation: "https://discord.com/channels/1395076754816761956/1402655824530247712/1402766407304872008",
     BuildExpression: "https://discord.com/channels/1395076754816761956/1402655824530247712/1402768168258244760",

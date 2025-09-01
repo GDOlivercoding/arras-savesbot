@@ -9,8 +9,8 @@ export const modes: DirSortedMode[] = [
 ]
 
 export const modeToDescription: ModeToDescription = {
-    Normal: "Modes without excessively modifiers, usually connected to nexus. (except Portal)",
-    Growth: "Deprecated save type. Saves if the mode is growth or overgrowth.",
+    Normal: "Modes without excessive modifiers, usually connected to nexus (except Portal). ",
+    Growth: "Deprecated save type. Saves if the mode is growth.",
     "Arms Race": "If the mode has the Arms Race prefix, lower in the hierarchy than growth.",
     Olddreads: "The Old Dreadnoughts gamemode, any mode with 'old' in it.",
     Newdreads: "Any v2 Dreadnought, this also includes any runs in the new Labyrinth."

@@ -131,7 +131,7 @@ export async function main(
     
     code = new SaveCode(strcode)
 
-    const dirname = code.constructDirname().name
+    const dirname = code.constructDirname()
 
     savePath = arrasSaves.join(code.dirSortedMode, dirname)
     if (!savePath.exists()) savePath.mkdir()

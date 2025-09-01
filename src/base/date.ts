@@ -3,7 +3,8 @@ import { DateOperationMap, DateSuffixes } from "./types";
 
 const re_matchSingle = /^(?<value>\d+)(?<unit>y|mon|d|h|min|s|ms)$/
 
-/** The limit to every value of a {@link distyperef.DateOperation} 
+/**  
+ * The limit to every value of a {@link distyperef.DateOperation} 
  * for safety of the {@link Date} constructor. 
 */
 
@@ -18,7 +19,7 @@ const LIMIT = 1_000_000
  */
 export function singleDateCellToUnix(expr: string, defaultYear?: boolean): number {
     const orig = expr;
-    expr = expr.replace(/^\[/, "").replace(/\]$/, "")
+    expr = expr.replace(/^\(/, "").replace(/\)$/, "")
     const split = expr.split(" ")
 
     const now = new Date()
@@ -43,16 +44,17 @@ export function singleDateCellToUnix(expr: string, defaultYear?: boolean): numbe
             parts[unit] = value;
 
         } else {
+            // I think the groups value will always be true so this is useless.
             throw Error(
                 `Pair '${part}'`
                 + ` of cell '${orig}'`
-                + ` is invalid: match ${singleRes ? "succeeded" : "failed"}`
+                + ` is invalid, status: matching ${singleRes ? "succeeded" : "failed"}`
             )
         }
     }
 
-    let year = parts.y ?? (defaultYear ? now.getUTCFullYear() : 0)
-    if (year < 100) {
+    let year = parts.y ?? (defaultYear ? now.getUTCFullYear() : 1970)
+    if (defaultYear && year < 100) {
         year += 2000
     }
     parts.y = year;
@@ -67,6 +69,6 @@ export function singleDateCellToUnix(expr: string, defaultYear?: boolean): numbe
         parts.ms ?? 0
     )
 
-    console.log(target)
+    //console.log(target)
     return Math.floor(target.getTime() / 1000)
 }

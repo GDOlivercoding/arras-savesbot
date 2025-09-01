@@ -83,9 +83,9 @@ const command: Command = {
 
         const includeEnded = false // options.getBoolean("include-ended-runs")
         const screenshotExpr = options.getString("screenshot-count")
-        const dirSortedMode = options.getString("sub-mode") as DirSortedMode | undefined
+        const dirSortedMode = options.getString("sub-mode") as DirSortedMode | null
         const historyExpr = options.getString("history-count")
-        const region = options.getString("region") as Region | undefined
+        const region = options.getString("region") as Region | null
         const codeMatchExpr = options.getString("match-code")
 
         const ssFunc = compiler.compileNumOp(screenshotExpr)
@@ -100,7 +100,7 @@ const command: Command = {
         const searchOptions: SaveQueryOptions = {
             screenshots: ssFunc,
             history: historyFunc,
-            dirSortedMode: dirSortedMode,
+            dirSortedMode,
             region,
             codeParts
         }

@@ -34,8 +34,8 @@ const re_matchNumOP = /^(?<oper>[><]=?)\D*(?<value>\d+)$/
 const re_matchAround = /^<(?<range>\d+)>(?<value>\d+)$/
 const re_matchRange = /^<(?<min>\d+)\D*-\D*(?<max>\d+)>$/
 const re_matchSingleSlot = /^(?<key>[a-z]+|\d+);(?<value>.+)$/
-const re_matchInner = /\[[^\]]+\]/g
-const re_matchSpecialCaseAround = /^<(?<tolerance>\[[^\]]+\])>(?<value>\[[^\]]+\])$/
+const re_matchInner = /\([^)]+\)/g
+const re_matchSpecialCaseAround = /^<(?<tolerance>\([^)]+\))>(?<value>\([^)]+\))$/
 
 export class InteractionCompiler {
     interaction: ChatInputCommandInteraction
@@ -102,7 +102,7 @@ export function parseGenericCodeMatch(expr: string): CodePartPairs {
         if (!isNaN(parseInt(key))) {
             const keyIndex = parseInt(key) - 1
             if (keyIndex < 0 || keyIndex > indexToKey.length - 1)
-                throw errKeyofPair(pair, key, "is out of bounds of [1-14]")
+                throw errKeyofPair(pair, key, "is out of bounds of [1-14] as an index.")
 
             key = indexToKey[keyIndex]
 
@@ -180,7 +180,7 @@ export function parseIntOper(expr: string): NumOpFunc | null {
  * @returns null: failure otherwise success.
  * @throws {Error} with message if some values are incorrect.
  */
-export function parseDateOper(expr: string): NumOpFunc | null {
+export function parseDateOper(expr: string, defaultYear: boolean): NumOpFunc | null {
     const rangeRes = re_matchSpecialCaseAround.exec(expr);
 
     // Special casing because `tolerance` can't default to a year
@@ -190,13 +190,15 @@ export function parseDateOper(expr: string): NumOpFunc | null {
         const value = rangeRes.groups.value;
 
         const toleranceUnix = singleDateCellToUnix(tolerance)
-        const valueUnix = singleDateCellToUnix(value, true)
+        const valueUnix = singleDateCellToUnix(value, defaultYear)
 
         return (statVal) => aroundFunc(statVal, valueUnix, toleranceUnix)
     }
 
     // XXX how im i supposed to avoid the global flag trap?
-    return parseIntOper(expr.replaceAll(re_matchInner, expr => String(singleDateCellToUnix(expr, true))))
+    const res = parseIntOper(expr.replaceAll(re_matchInner, expr => String(singleDateCellToUnix(expr, defaultYear))))
+    re_matchInner.lastIndex = 0;
+    return res;
 }
 
 /**
@@ -215,7 +217,7 @@ function createIntOperFunc(name: string) {
     }
 }
 
-function createDateOperFunc(name: string) {
+function createDateOperFunc(name: string, defaultYear: boolean) {
     return (userVal: string) => {
         const numOpRes = parseIntOper(userVal)
         if (numOpRes) {
@@ -223,11 +225,11 @@ function createDateOperFunc(name: string) {
         }
 
         // This part is clear.
-        const res = parseDateOper(userVal)
+        const res = parseDateOper(userVal, defaultYear)
         if (!res) {
             throw Error(
                 `'${name}' code part value '${userVal}' is not parseable as type ${distyperef.DateOperation}`
-                + `or ${distyperef.NumberOperation}.`
+                + ` or ${distyperef.NumberOperation}.`
             )
         }
         return wrapDateOrIntOperFunc(res)
@@ -314,12 +316,12 @@ export const attrnameToCompiler: AttrnameToCompiler = {
         }
     },
     rawScore: createIntOperFunc("score"),
-    runtimeSeconds: createDateOperFunc("runtime"),
+    runtimeSeconds: createDateOperFunc("runtime", false),
     kills: createIntOperFunc("kills"),
     assists: createIntOperFunc("assists"),
     bossKills: createIntOperFunc("bosses"),
     polygonsDestroyed: createIntOperFunc("polygons"),
     customKills: createIntOperFunc("custom"),
-    creationTime: createDateOperFunc("creation"),
+    creationTime: createDateOperFunc("creation", true),
     safetyToken: (userVal) => (safetyToken) => userVal == safetyToken
 } as const
