@@ -253,9 +253,13 @@ export class Server {
         this.regionChar = this.id[0] as RegionChar
 
         if (!this.regionChar)
-            throw new Error(`Regional character ${this.id[0]} is invalid.`)
+            throw new Error(`The serverId string is empty.`)
 
         this.region = this.regions[this.regionChar]
+        if (!this.region) {
+            throw Error(`Invalid region character '${this.regionChar}' of '#${this.id}'`)
+        }
+
         this.isSandbox = this.id.length == 3
     }
 

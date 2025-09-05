@@ -28,7 +28,7 @@ export function singleDateCellToUnix(expr: string, defaultYear?: boolean): numbe
     for (const part of split) {
         const singleRes = re_matchSingle.exec(part);
 
-        if (singleRes && singleRes.groups) {
+        if (singleRes?.groups) {
 
             const value = parseInt(singleRes.groups.value);
             const unit = singleRes.groups.unit as DateSuffixes;
