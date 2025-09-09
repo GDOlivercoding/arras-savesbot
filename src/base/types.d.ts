@@ -112,7 +112,7 @@ type CodePartFunc = (statVal: unknown) => boolean
 
 type CodePartPairs = CodePartPair[]
 
-type DateSuffixes = "y" | "mon" | "d" | "h" | "min" | "s" | "ms"
+type DateSuffixes = "y" | "mon" | "d" | "h" | "min" | "s"
 
 type DateOperationMap = Partial<{
     [K in DateSuffixes]: number

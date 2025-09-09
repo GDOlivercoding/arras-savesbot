@@ -1,6 +1,7 @@
 **/_*
 **/*.test.*
 *.png
+*.txt
 
 # Logs
 logs

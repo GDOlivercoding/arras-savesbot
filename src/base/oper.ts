@@ -2,7 +2,7 @@ import { ChatInputCommandInteraction } from "discord.js"
 import { AttrnameToCompiler, CodePartFunc, CodePartPairs, NumOpFunc, OperFunc } from "./types"
 import { ShortKey, indexToKey, keyToAttrname } from "./structs"
 import { parse } from "arras-parser"
-import { distyperef } from "./utils"
+import { dateToUnix, distyperef } from "./utils"
 import { Build } from "./code"
 import { singleDateCellToUnix } from "./date"
 
@@ -196,7 +196,10 @@ export function parseDateOper(expr: string, defaultYear: boolean): NumOpFunc | n
     }
 
     // XXX how im i supposed to avoid the global flag trap?
-    const res = parseIntOper(expr.replaceAll(re_matchInner, expr => String(singleDateCellToUnix(expr, defaultYear))))
+    const res = parseIntOper(expr.replaceAll(
+        re_matchInner, 
+        expr => String(singleDateCellToUnix(expr, defaultYear))
+    ))
     re_matchInner.lastIndex = 0;
     return res;
 }
@@ -245,7 +248,7 @@ function createDateOperFunc(name: string, defaultYear: boolean) {
 function wrapDateOrIntOperFunc(func: NumOpFunc) {
     return (statVal: Date | number) => {
         if (typeof statVal == "number") return func(statVal);
-        return func(Math.floor(statVal.getTime() / 1000))
+        return func(dateToUnix(statVal))
     }
 }
 

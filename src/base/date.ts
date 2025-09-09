@@ -1,7 +1,7 @@
-import { distyperef } from "./utils";
+import { dateToUnix, distyperef } from "./utils";
 import { DateOperationMap, DateSuffixes } from "./types";
 
-const re_matchSingle = /^(?<value>\d+)(?<unit>y|mon|d|h|min|s|ms)$/
+const re_matchSingle = /^(?<value>\d+)(?<unit>y|mon|d|h|min|s)$/
 
 /**  
  * The limit to every value of a {@link distyperef.DateOperation} 
@@ -9,6 +9,13 @@ const re_matchSingle = /^(?<value>\d+)(?<unit>y|mon|d|h|min|s|ms)$/
 */
 
 const LIMIT = 1_000_000
+
+/**
+ * A "difficult" decision, we can either use Dates (native), Unix (common) or Unix in miliseconds (native .getTime()).
+ * Because the values on our side are Date(s) which are easy to convert to all.
+ * Because runtime takes seconds, we can conclude that
+ * the best possible value type is Unix in seconds.
+ */
 
 /**
  * Parse a single Date cell. (ex.: [2025y 8mon 24d 1h 7min 48s 758ms])
@@ -20,7 +27,7 @@ const LIMIT = 1_000_000
 export function singleDateCellToUnix(expr: string, defaultYear?: boolean): number {
     const orig = expr;
     expr = expr.replace(/^\(/, "").replace(/\)$/, "")
-    const split = expr.split(" ")
+    const split = expr.split(" ").map(s => s.trim()).filter(s => !!s)
 
     const now = new Date()
     const parts: DateOperationMap = {};
@@ -48,7 +55,8 @@ export function singleDateCellToUnix(expr: string, defaultYear?: boolean): numbe
             throw Error(
                 `Pair '${part}'`
                 + ` of cell '${orig}'`
-                + ` is invalid, status: matching ${singleRes ? "succeeded" : "failed"}`
+                + ` is invalid. `
+                + ` Make sure the pair starts with a number and ends with a date suffix.`
             )
         }
     }
@@ -58,6 +66,7 @@ export function singleDateCellToUnix(expr: string, defaultYear?: boolean): numbe
         year += 2000
     }
     parts.y = year;
+    console.log(parts)
 
     const target = new Date(
         parts.y,
@@ -65,10 +74,9 @@ export function singleDateCellToUnix(expr: string, defaultYear?: boolean): numbe
         parts.d ?? 0,
         parts.h ?? 0,
         parts.min ?? 0,
-        parts.s ?? 0,
-        parts.ms ?? 0
+        parts.s ?? 0
     )
 
     //console.log(target)
-    return Math.floor(target.getTime() / 1000)
+    return dateToUnix(target)
 }

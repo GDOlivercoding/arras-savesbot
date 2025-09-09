@@ -46,6 +46,15 @@ const handler: ProxyHandler<Formatted> = {
     },
 }
 
+/**
+ * Discord-Type-Reference.
+ * 
+ * Attributes return a discord formatted string linking
+ * to the doc of the type.
+ * 
+ * For some reason fully typed, so you know the exact string value
+ * of the attribute you're accessing.
+ */
 export const distyperef = new Proxy({} as Formatted, handler)
 
 export async function downloadFile(url: string, savePath: Path) {
@@ -53,7 +62,9 @@ export async function downloadFile(url: string, savePath: Path) {
     if (!res.body) throw new Error("Body missing.")
     const fileStream = savePath.createWriteStream({ flags: "wx" })
     // FIXME: Incompatible types
-    finished(Readable.fromWeb(res.body).pipe(fileStream), (err) => {
-        if (err) throw err
-    })
+    finished(Readable.fromWeb(res.body).pipe(fileStream), (err) => err && (() => {throw err})())
+}
+
+export function dateToUnix(date: Date) {
+    return Math.floor(date.getTime() / 1000)
 }
