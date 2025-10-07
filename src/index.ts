@@ -3,7 +3,7 @@ import { commands } from "./get-commands"
 import { Client, GatewayIntentBits, REST, Routes } from "discord.js"
 
 for (const [name, cmd] of Object.entries(commands)) {
-    if (!cmd.test()) {
+    if (cmd.test?.() == false) {
         throw new Error(`Command test of ${name} has failed.`)
     }
 }

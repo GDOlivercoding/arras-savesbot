@@ -8,7 +8,7 @@ import { ShortKey } from "./structs"
 interface Command {
     payload: SlashCommandOptionsOnlyBuilder
     execute(interaction: ChatInputCommandInteraction): Promise<unknown>
-    test(): boolean
+    test?(): boolean
 }
 
 // saves and structures
