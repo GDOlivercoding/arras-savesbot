@@ -18,7 +18,7 @@ Key may be a name of a part, or an index of the part in the code [1-14].
 - 10: **bosses**: [**NumberOperation**](./numOp.md), boss kills and assists count
 - 11: **polygons**: [**NumberOperation**](./numOp.md), polygons destroyed
 - 12: **custom**: [**NumberOperation**](./numOp.md), special "dread" kills
-- 13: **creation**: [**NumberOperation**](./numOp.md) with unix timestamp (>=1754080892) or [**DateOperation**](dateOp.md)
+- 13: **creation**: [**NumberOperation**](./numOp.md) with unix timestamp (>=1754080892) or [**DateOperation**](./dateOp.md)
 - 14: **token**: `string`, strict comparison
 
 - Example: `[score;>1,000,000]` or `[7;>1,000,000]`

@@ -1,6 +1,6 @@
 # [BuildExpression:](./buildExpr.md)
 
-Match a build by upgrade skills with [**NumberOperation**](...)s.
+Match a build by upgrade skills with [**NumberOperation**](./numOp.md)s.
 The expression matches at the start at ends when there's nothing else to match.
 Leave a slot between slashes to indicate any (might change this to something like a ?).
 Special: append a dollar sign ($) to the end to anchor matching to the end of the build.
