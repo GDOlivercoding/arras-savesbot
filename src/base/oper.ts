@@ -34,7 +34,7 @@ const re_matchNumOP = /^(?<oper>[><]=?)\D*(?<value>\d+)$/
 const re_matchAround = /^<(?<range>\d+)>(?<value>\d+)$/
 const re_matchRange = /^<(?<min>\d+)\D*-\D*(?<max>\d+)>$/
 const re_matchSingleSlot = /^(?<key>[a-z]+|\d+);(?<value>.+)$/
-const re_matchInner = /\([^)]+\)/g
+const re_matchInner = /\([^)]*\)/g
 const re_matchSpecialCaseAround = /^<(?<tolerance>\([^)]+\))>(?<value>\([^)]+\))$/
 
 export class InteractionCompiler {
@@ -196,10 +196,15 @@ export function parseDateOper(expr: string, defaultYear: boolean): NumOpFunc | n
     }
 
     // XXX how im i supposed to avoid the global flag trap?
-    const res = parseIntOper(expr.replaceAll(
+    const intermed = expr.replaceAll(
         re_matchInner, 
         expr => String(singleDateCellToUnix(expr, defaultYear))
-    ))
+    )
+    console.log("intermediate value: ", intermed);
+
+    const res = parseIntOper(intermed)
+    console.log(res);
+
     re_matchInner.lastIndex = 0;
     return res;
 }
