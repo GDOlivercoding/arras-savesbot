@@ -1,6 +1,10 @@
 import "dotenv/config"
 import { commands } from "./get-commands"
-import { Client, GatewayIntentBits, REST, Routes } from "discord.js"
+import { Client, REST, Routes } from "discord.js"
+
+const client = new Client({
+    intents: []
+})
 
 for (const [name, cmd] of Object.entries(commands)) {
     if (cmd.test?.() == false) {
@@ -11,13 +15,10 @@ for (const [name, cmd] of Object.entries(commands)) {
 const rest = new REST({ version: "10" }).setToken(
     process.env.TOKEN || "MISSING"
 )
+
 rest.put(Routes.applicationCommands(process.env.APP_ID || "MISSING"), {
     body: Object.values(commands).map((cmd) => cmd.payload.toJSON())
 }).then(() => console.log("Successfully synced commands"))
-
-const client = new Client({
-    intents: []
-})
 
 client.once("ready", async (client) => {
     console.log("Ready!", client.user.tag)
@@ -28,11 +29,11 @@ client.once("ready", async (client) => {
     } else {
         throw new Error("Wrong channel." + channel)
     }
-})
+});
 
 client.on("interactionCreate", (interaction) => {
     if (!interaction.isChatInputCommand()) return
     commands[interaction.commandName].execute(interaction)
-})
+});
 
-client.login(process.env.TOKEN)
+client.login(process.env.TOKEN);

@@ -1,4 +1,4 @@
-# [/find command help](https://discord.com/channels/1395076754816761956/1402404042197696713/1402766298127274005)
+# [/find command help](https://github.com/GDOlivercoding/arras-savesbot/blob/main/docs/cmd_find/main.md)
 
 # command: /find
 

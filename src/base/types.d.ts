@@ -57,19 +57,19 @@ interface SaveEndedRun extends Save {
 type AnySave = Save | SaveEndedRun
 
 type SaveQueryOptions = PartialNullable<{
-    screenshots: EvaluatorFunc
+    screenshots: PredicateFunc
     dirSortedMode: DirSortedMode
-    history: EvaluatorFunc
+    history: PredicateFunc
     region: Region
     codeParts: CodePartPairs
 }>
 
 // operator syntax
 
-type EvaluatorFunc<V> = (statVal: V) => boolean
+type PredicateFunc<V> = (statVal: V) => boolean
 type CompilerFunc<R> = (userVal: string) => R
 
-type NumOpFunc = (statVal: number) => boolean
+type NumOpFunc = PredicateFunc<number>
 type OperFunc = (statVal: number, userVal: number) => boolean
 
 // map for find.ts
@@ -95,7 +95,7 @@ type PickedCodeKeys =
     | "safetyToken";
 
 type AttrnameToCompiler = {
-    [K in PickedCodeKeys]: CompilerFunc<EvaluatorFunc<SaveCode[K]>>
+    [K in PickedCodeKeys]: CompilerFunc<PredicateFunc<SaveCode[K]>>
 }
 
 type KeyToAttrname = {
@@ -108,12 +108,10 @@ type CodePartPair = {
     predicate: CodePartFunc
 }
 
-type CodePartFunc = (statVal: unknown) => boolean
-
+type CodePartFunc = PredicateFunc<unknown>
 type CodePartPairs = CodePartPair[]
 
 type DateSuffixes = "y" | "mon" | "d" | "h" | "min" | "s"
-
 type DateOperationMap = Partial<{
     [K in DateSuffixes]: number
 }>
