@@ -1,4 +1,4 @@
-# [GamemodeExpression](...)
+# [GamemodeExpression](./gamemodeExpr.md)
 
 A gamemode expression is a string which describes a mode's property.
 This is the 7th part of a save code, by pressing L (or debug keybind)

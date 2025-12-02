@@ -16,14 +16,14 @@ rest.put(Routes.applicationCommands(process.env.APP_ID || "MISSING"), {
 }).then(() => console.log("Successfully synced commands"))
 
 const client = new Client({
-    intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent]
+    intents: []
 })
 
 client.once("ready", async (client) => {
     console.log("Ready!", client.user.tag)
 
-    const channel = await client.channels.fetch("1401911748679831622")
-    if (channel && channel.isSendable()) {
+    const channel = await client.channels.fetch(process.env.MAIN_CHANNEL || "MISSING")
+    if (channel?.isSendable()) {
         channel.send("Ready!")
     } else {
         throw new Error("Wrong channel." + channel)

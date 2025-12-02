@@ -135,7 +135,7 @@ export function parseGenericCodeMatch(expr: string): CodePartPairs {
 }
 
 /**
- * Parse a {@link distyperef.DateOperation} (Integer Operation).
+ * Parse a {@link distyperef.NumberOperation} (Integer Operation).
  * @param expr The expression.
  * @returns Returns the parsed function or null as failure.
  */
@@ -258,19 +258,17 @@ export const attrnameToCompiler: AttrnameToCompiler = {
     mode: (userVal) => {
         let strictMode = false
         if (userVal.startsWith("!")) {
-            strictMode = true
             userVal = userVal.replace(/^!/, "")
+            strictMode = true
         }
 
         const userMode = parse(userVal)
         return (mode) => userMode.compare(mode, strictMode)
     }, 
     tankClass: (userVal) => {
-        const transform = (s: string) => s.toLowerCase().replace(/[ -]/g, "")
-
-        userVal = transform(userVal)
-
-        return (tankClass) => transform(tankClass).includes(userVal)
+        const transform = (s: string) => s.toLowerCase().replace(/[ -]/g, "");
+        userVal = transform(userVal);
+        return (tankClass) => transform(tankClass).includes(userVal);
     },
     build: (userVal) => {
         let endAnchor = false

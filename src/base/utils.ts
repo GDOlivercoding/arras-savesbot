@@ -21,11 +21,11 @@ export const unixFormat = {
 export type UnixFormat = typeof unixFormat[keyof typeof unixFormat]
 
 const nameToLink = {
-    NumberOperation: "https://discord.com/channels/1395076754816761956/1402655824530247712/1402766407304872008",
-    BuildExpression: "https://discord.com/channels/1395076754816761956/1402655824530247712/1402768168258244760",
-    DateOperation: "https://discord.com/channels/1395076754816761956/1402655824530247712/1402766854807752815",
-    GamemodeExpression: "https://discord.com/channels/1395076754816761956/1402655824530247712/1404176405876445345",
-    CodePartExpression: "https://discord.com/channels/1395076754816761956/1402655824530247712/1402769566186340465"
+    NumberOperation: "https://github.com/GDOlivercoding/arras-savesbot/blob/main/docs/cmd_find/numOp.md",
+    BuildExpression: "https://github.com/GDOlivercoding/arras-savesbot/blob/main/docs/cmd_find/buildExpr.md",
+    DateOperation: "https://github.com/GDOlivercoding/arras-savesbot/blob/main/docs/cmd_find/dateOp.md#dateoperation",
+    GamemodeExpression: "https://github.com/GDOlivercoding/arras-savesbot/blob/main/docs/cmd_find/gamemodeExpr.md",
+    CodePartExpression: "https://github.com/GDOlivercoding/arras-savesbot/blob/main/docs/cmd_find/codeParts.md"
 } as const;
 
 // goofy ahh

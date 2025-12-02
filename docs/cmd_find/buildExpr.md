@@ -1,4 +1,4 @@
-# [BuildExpression:](...)
+# [BuildExpression:](./buildExpr.md)
 
 Match a build by upgrade skills with [**NumberOperation**](...)s.
 The expression matches at the start at ends when there's nothing else to match.

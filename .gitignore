@@ -2,6 +2,7 @@
 **/*.test.*
 *.png
 *.txt
+docs/cmd_find/fullOrig.md
 
 # Logs
 logs

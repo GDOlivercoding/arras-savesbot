@@ -37,6 +37,7 @@ export class SaveCode {
      * by colons, surrounded by parens and optionally backticks.
      */
     constructor(code: string) {
+        // `?(foo)`? -> foo
         this.innerCode = code.replace(/^`?\(/, "").replace(/\)`?$/, "")
         this.parts = this.innerCode.split(":")
 
