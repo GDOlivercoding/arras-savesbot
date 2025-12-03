@@ -57,9 +57,9 @@ interface SaveEndedRun extends Save {
 type AnySave = Save | SaveEndedRun
 
 type SaveQueryOptions = PartialNullable<{
-    screenshots: PredicateFunc
+    screenshots: PredicateFunc<number>
     dirSortedMode: DirSortedMode
-    history: PredicateFunc
+    history: PredicateFunc<number>
     region: Region
     codeParts: CodePartPairs
 }>

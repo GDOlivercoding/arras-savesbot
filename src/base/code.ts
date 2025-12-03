@@ -118,8 +118,8 @@ export class SaveCode {
      * @returns Whether the code is valid or not.
      */
     static validate(code: string): State {
-        function err(message: string): State {
-            return { state: "err", message }
+        function err(message: string) {
+            return { state: "err", message } satisfies State;
         }
 
         const codeParts = code
@@ -195,7 +195,7 @@ export class SaveCode {
         try {
             parse(mode) // mode
         } catch (error) {
-            let normalized = `${error}`.replace(/(?<!\.|!|\?)/, ".")
+            let normalized = `${error}`.replace(/(?<!\.|!|\?)$/, ".")
             normalized = normalized[0].toUpperCase() + normalized.slice(1)
             return err(`Failed parsing mode '${mode}': ${normalized}`)
         }

@@ -248,15 +248,10 @@ export class SaveCollection {
         return results
     }
 
-    querySaves(options: SaveQueryOptions, includeEndedRuns?: boolean): Save[] {
-        const { 
-            screenshots, 
-            dirSortedMode,
-            history, 
-            region, 
-            codeParts 
-        } = options
-
+    querySaves(
+        { screenshots, dirSortedMode, history, region, codeParts }: SaveQueryOptions, 
+        includeEndedRuns?: boolean
+): Save[] {
         this.filterSaves(includeEndedRuns)
         if (screenshots != null) this.byScreenshotCount(screenshots)
         if (dirSortedMode != null) this.byDirSortedMode(dirSortedMode)

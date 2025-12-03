@@ -8,7 +8,7 @@ const command: Command = {
     .setDescription("Get the information of a save.")
     .addStringOption(o => o
         .setName("code-id")
-        .setDescription("The target code's ID (first element).")
+        .setDescription("The target code's ID.")
         .setRequired(true)
     )
     .addIntegerOption(o => o
@@ -77,14 +77,16 @@ const command: Command = {
         }
 
         const content =
-            `Viewing save with code ${save.code},` +
-            ` with ${files.length} screenshot${files.length == 1 ? "" : "s"}.` +
-            `\nName: ${save.path.name}\n` +
-            (output.length
+            `Viewing save with code ${save.code}` 
+            + `\nWith ${files.length} screenshot${files.length == 1 ? "" : "s"}` 
+            + `\nName: ${save.path.name}\n` 
+            + (
+                output.length
                 ? "History:\n" + output.join("\n") // there are some history saves
                 : historyIndex != null
-                  ? `History index ${historyIndex}.` // we are currently in a history save
-                  : "This save has no history.") // neither of the above
+                    ? `History index ${historyIndex}.` // we are currently in a history save
+                    : "This save has no history." // neither of the above
+            ) 
 
         interaction.reply({ content, files })
     },
