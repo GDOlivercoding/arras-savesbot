@@ -2,9 +2,7 @@ import "dotenv/config"
 import { commands } from "./get-commands"
 import { Client, REST, Routes } from "discord.js"
 
-const client = new Client({
-    intents: []
-})
+const client = new Client({intents: []})
 
 for (const [name, cmd] of Object.entries(commands)) {
     if (cmd.test?.() == false) {

@@ -45,7 +45,7 @@ function resolveRestore(): SaveStructure[] {
     // return a list of the new save history
 
     // ffs with these types man
-    const send = (...items: { toString(): string }[]) => {
+    const send = (...items: unknown[]) => {
         console.info(...items)
     }
 

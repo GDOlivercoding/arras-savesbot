@@ -1,5 +1,6 @@
 import { Path } from "pathobj/tspath";
 import { finished, Readable } from "stream";
+import { ClientCount, ServerStatus } from "./types";
 
 export const unixFormat = {
     /** 01:46 */
@@ -66,4 +67,14 @@ export async function downloadFile(url: string, savePath: Path) {
 
 export function dateToUnix(date: Date) {
     return Math.floor(date.getTime() / 1000)
+}
+
+const APIRoot = "https://qrp6ujau11f36bnm-c.uvwx.xyz:8443/2222/";
+
+export async function clientCount(): Promise<ClientCount> {
+    return await (await fetch(APIRoot + "clientCount")).json() as ClientCount;
+}
+
+export async function serverStatus(): Promise<ServerStatus> {
+    return (await (await fetch(APIRoot + "status")).json() as { status: ServerStatus }).status;
 }

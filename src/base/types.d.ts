@@ -55,6 +55,7 @@ interface SaveEndedRun extends Save {
 }
 
 type AnySave = Save | SaveEndedRun
+type IDToSave = Record<string, Save>
 
 type SaveQueryOptions = PartialNullable<{
     screenshots: PredicateFunc<number>
@@ -117,6 +118,23 @@ type DateOperationMap = Partial<{
 }>
 
 type State = {state: "ok" | "err", message: string}
+type ClientCount = {ok: boolean, clientCount: number}
+
+interface ServerPayload {
+    online: boolean
+    name: string
+    uptime?: number
+    clients?: number
+    maxClients?: number
+    mspt?: number
+    code: string
+    host: string
+    hidden?: boolean
+}
+
+type ServerStatus = {
+    [serverId: string]: ServerPayload
+}
 
 // /.../settings.json structure
 type Data = {

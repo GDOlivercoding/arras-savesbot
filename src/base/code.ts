@@ -1,6 +1,6 @@
 import { parse } from "arras-parser"
 import { Gamemode } from "arras-parser/types"
-import { DirSortedMode, Region, RegionChar, State } from "./types"
+import { DirSortedMode, Region, RegionChar, ServerPayload, State } from "./types"
 import { indexToKey } from "./structs"
 import { UnixFormat } from "./utils"
 
@@ -8,27 +8,44 @@ import { UnixFormat } from "./utils"
 
 export class SaveCode {
     // meta
+    /** The code without surrouding backticks and parens */
     innerCode: string
+    /** The code split into 14 string parts */
     parts: string[]
 
     // code parts from index 0 to 13
+    /** The unique ID given to every run */
     ID: string
+    /** The server tag as a {@linkcode Server} object */
     server: Server
+    /** The gamemode string compiled to a Gamemode object (not meant to be re-exported) */
     mode: Gamemode
+    /** The tank class name */
     tankClass: string
+    /** The tank build as a simple Build object */
     build: Build
-    rawScore: number
+    score: number
+    /** Time alive in seconds */
     runtimeSeconds: number
+    /** Number of kills */
     kills: number
+    /** Number of assits */
     assists: number
+    /** Number of boss kills and assists */
     bossKills: number
+    /** Number of all polygons destroyed */
     polygonsDestroyed: number
+    /** Number of player kills and assists as a dreadnought */
     customKills: number
+    /** A Date object pointing to when this code was saved, from a UNIX timestamp */
     creationTime: Date
+    /** The unknown hash string at the end */
     safetyToken: string
     
     // other information
+    /** The save's mode sorted into 5 categories */
     dirSortedMode: DirSortedMode
+    /** The score formatted in a humanly readable way using {@linkcode scoreToReadable} */
     formattedScore: string
 
     /**
@@ -77,8 +94,8 @@ export class SaveCode {
 
         this.tankClass = tankClass
         this.build = new Build(build)
-        this.rawScore = parseInt(rawScore)
-        this.formattedScore = scoreToReadable(this.rawScore)
+        this.score = parseInt(rawScore)
+        this.formattedScore = scoreToReadable(this.score)
         this.runtimeSeconds = parseInt(runtimeSeconds)
         this.kills = parseInt(kills)
         this.assists = parseInt(assists)
@@ -100,6 +117,11 @@ export class SaveCode {
         ].join(" ")
     }
 
+    /**
+     * Return a Discord timestamp string pointing to when this code was saved
+     * @param format The way to format the string using the `utils.unixFormat` enum
+     * @returns The Discord timestamp
+     */
     creationTimestamp(format: UnixFormat) {
         return `<t:${Math.floor(this.creationTime.getTime() / 1000)}:${format}>`
     }
@@ -231,41 +253,40 @@ export class SaveCode {
 }
 
 export class Server {
-    regions: { [P in RegionChar]: Region } = {
+    regions: Record<RegionChar, Region> = {
         e: "Europe",
         w: "US West",
         c: "US Central",
         a: "Asia",
         o: "Oceania"
-    } as const
+    };
 
     /** The server id passed in the constructor minus its trailing hashtag. */
-    id: string
+    name: string
+    /** A verbose region value of the server */
     region: Region
+    /** A concise region value of the server */
     regionChar: RegionChar
+    /** Is this server a sandbox server? */
     isSandbox: boolean
 
-    /**
-     *
-     * @param {string} serverId
-     */
-    constructor(serverId: string) {
-        this.id = serverId.replace(/^#/, "")
-        this.regionChar = this.id[0] as RegionChar
+    constructor(serverName: string) {
+        this.name = serverName.replace(/^#/, "")
+        this.regionChar = this.name[0] as RegionChar
 
         if (!this.regionChar)
             throw new Error(`The serverId string is empty.`)
 
         this.region = this.regions[this.regionChar]
         if (!this.region) {
-            throw Error(`Invalid region character '${this.regionChar}' of '#${this.id}'`)
+            throw Error(`Invalid region character '${this.regionChar}' of '#${this.name}'`)
         }
 
-        this.isSandbox = this.id.length == 3
+        this.isSandbox = this.name.length == 3
     }
 
     get link() {
-        return `https://arras.io/#${this.id}`
+        return `https://arras.io/#${this.name}`
     }
 
     toString() {
@@ -273,9 +294,49 @@ export class Server {
     }
 }
 
+export class APIServer extends Server implements ServerPayload {
+    // payload data
+
+    // this.code's parts
+    hoster: string
+    regionShort: string
+    mode: Gamemode
+    online: boolean
+    uptime?: number
+    clients?: number
+    maxClients?: number
+    mspt?: number
+    code: string
+    host: string
+    hidden?: boolean
+    // build from */status API 
+    constructor(payload: ServerPayload) {
+        console.log("payload:", payload);
+        super(payload.name);
+        this.online = payload.online;
+        this.uptime = payload.uptime;
+        this.clients = payload.clients;
+        this.maxClients = payload.maxClients;
+        this.mspt = payload.mspt;
+
+        this.code = payload.code;
+        const [hoster, regionShort, mode] = this.code.split("-");
+        this.hoster = hoster;
+        this.regionShort = regionShort;
+        this.mode = parse(mode)
+
+        this.host = payload.host;
+        this.hidden = payload.hidden;
+    }
+}
+
+/** A class representing an unordered Arras.io tank build */
 export class Build {
+    /** The original value passed into the constructor */
     build: string
+    /** The slash split build as an Array of numbers */
     parts: number[]
+    /** The total sum of all the upgrades in the build */
     sum: number
 
     constructor(build: string) {
@@ -294,7 +355,7 @@ export class Build {
     }
 }
 
-const suffixes: { [key: number | string]: string } = {
+const suffixes: Record<number, string> = {
     6: "K",
     7: "m",
     8: "m",
@@ -302,11 +363,6 @@ const suffixes: { [key: number | string]: string } = {
     10: "b"
 }
 
-/**
- *
- * @param {string | number} score
- * @returns {string}
- */
 function scoreToReadable(score: number): string {
     // 1_784_485
     const str = score.toString()

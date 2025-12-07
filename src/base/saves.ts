@@ -9,6 +9,7 @@ import {
     SaveStructure,
     AnySave,
     CodePartPairs,
+    IDToSave,
 } from "./types"
 import { modes } from "./structs"
 
@@ -78,10 +79,9 @@ export function interrogateTop(top: Path): AnySave {
     return { code, path: top, windowed, fullscreen, history }
 }
 
-interface IDToSave {
-    [ID: string]: Save
-}
-
+/**
+ * A singleton (probably) object that holds and manages arras saves.
+ */
 export class SaveCollection {
     /** The readonly directory target. */
     readonly target: Path

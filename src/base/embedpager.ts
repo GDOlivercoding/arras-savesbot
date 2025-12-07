@@ -36,7 +36,6 @@ function sliceEmbeds(
         ) {
             // dump result
             i++
-
             output.push(curEmbed)
             curEmbed = new EmbedBuilder().setTitle(getTitle(i))
         }

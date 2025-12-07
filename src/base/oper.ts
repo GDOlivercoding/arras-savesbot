@@ -259,7 +259,7 @@ function wrapDateOrIntOperFunc(func: NumOpFunc) {
 
 export const attrnameToCompiler: AttrnameToCompiler = {
     ID: (userVal) => (id) => userVal == id,
-    server: (userVal) => (server) => userVal == server.id, // TODO possibly modify
+    server: (userVal) => (server) => userVal == server.name, // TODO possibly modify
     mode: (userVal) => {
         let strictMode = false
         if (userVal.startsWith("!")) {

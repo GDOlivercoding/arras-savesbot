@@ -5,26 +5,23 @@ import { unixFormat } from "../base/utils"
 
 const command: Command = {
     payload: new SlashCommandBuilder()
-        .setName("analyze")
+        .setName("analyse")
         .setDescription("Analyze a code and return it readable and parsed.")
-        .addStringOption((option) =>
-            option
-                .setName("code")
-                .setDescription("The Arras.io save code to analyze.")
-                .setRequired(true)
+        .addStringOption(o => o
+            .setName("code")
+            .setDescription("The Arras.io save code to analyse.")
+            .setRequired(true)
         )
-        .addBooleanOption((option) =>
-            option
-                .setName("blur_token")
-                .setDescription(
-                    "Blur the safety token in the output for privacy."
-                )
-                .setRequired(false)
+        .addBooleanOption(o => o
+            .setName("blur_token")
+            .setDescription(
+                "Blur the safety token in the output for privacy, default false. "
+            )
+            .setRequired(false)
         ),
     async execute(interaction) {
         const textCode = interaction.options.getString("code", true)
-        const blur =
-            interaction.options.getBoolean("blur_token", false) || false
+        const blur = interaction.options.getBoolean("blur_token", false) || false
 
         const res = SaveCode.validate(textCode)
         if (res.state == "err") {
@@ -36,16 +33,16 @@ const command: Command = {
 
         const contents = [
             `ID: ${code.ID}`,
-            `Server: [#${code.server.id}](${code.server})`,
+            `Server: [#${code.server.name}](${code.server})`,
             `Region: ${code.server.region}`,
-            `Mode: ${code.mode}`,
             `Sub-mode: ${code.dirSortedMode}`,
+            `Mode: ${code.mode}`,
             `Tank: ${code.tankClass}`,
             `Build: ${code.build}`,
             `Kills/Assists/Boss kills: ${code.kills}/${code.assists}/${code.bossKills}`,
             `Polygons destroyed/Dread kills: ${code.polygonsDestroyed}/${code.customKills}`,
             `Score: ${code.formattedScore}`,
-            `Kills/Million: ${(((code.kills + code.assists / 25) / code.rawScore) * 1_000_000).toFixed(2)}`,
+            `Kills/Million: ${(((code.kills + code.assists / 25) / code.score) * 1_000_000).toFixed(2)}kills/mil`,
             `Saved at: ${code.creationTimestamp(unixFormat.DDmmmmYYYY_HHMM)}, ${code.creationTimestamp(unixFormat.relative)}`,
             `Safety token: ${blur ? "||" + code.safetyToken + "||" : code.safetyToken}`
         ]
